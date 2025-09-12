@@ -16,8 +16,8 @@ jobs:
           npm install
           npm run-script build
       - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@4.1.1
+        uses: JamesIves/github-pages-deploy-action@4
         with:
-          token: ${{ secrets.ACCESS_TOKEN }}
+          token: ${{ secrets.WEBSITE_TOKEN }}
           branch: gh-pages
           folder: .
