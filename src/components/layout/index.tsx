@@ -1,7 +1,7 @@
 import React from "react";
 import styles from "./index.module.less";
 import { Layout as AntdLayout } from "antd";
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import { NAVBAR_ITEMS } from "@data/template/navbar";
 const { Header, Content, Footer } = AntdLayout;
 
@@ -25,7 +25,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               key={item.key}
               className={`${styles.menuItem} ${item.key === currentKey ? styles.active : ''}`}
             >
-              <a href={item.href}>{item.label}</a>
+              <Link to={item.href}>{item.label}</Link>
             </li>
           ))}
         </ul>
