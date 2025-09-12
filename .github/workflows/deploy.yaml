@@ -21,4 +21,4 @@ jobs:
           ACCESS_TOKEN: ${{ secrets.WEBSITE_TOKEN }}
           BRANCH: gh-pages
           BUILD_DIR: ./dist
-          folder: build
+          folder: .
