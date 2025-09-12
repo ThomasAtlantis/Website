@@ -1,0 +1,146 @@
+@secondary-color: gray;
+@primary-font: "HarmonyOS Sans SC";
+
+.activityContainer {
+  display: flex;
+  position: relative;
+  min-height: 100vh;
+  width: 100%; // 使用全宽，因为父容器已经限制了宽度
+}
+
+.masonry {
+  flex: 1;
+  position: relative;
+  padding: 0;
+  width: 100%;
+}
+
+.masonryItem {
+  position: absolute;
+  width: 200px; // 默认宽度，会被JavaScript动态调整
+  font-family: @primary-font;
+  opacity: 0; // 初始隐藏，等待JavaScript布局完成后显示
+  transition: opacity 0.2s ease-in-out;
+  
+  img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    display: block;
+    margin-bottom: 10px;
+    border-radius: 4px;
+  }
+  
+  h2 {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: #333;
+  }
+  
+  p {
+    text-align: justify;
+    margin: 0 0 0 0;
+    line-height: 1.6;
+    color: #666;
+    word-break: break-all;
+    
+    // 引用样式
+    :global(.blockquote) {
+      display: block;
+      margin: 10px 0;
+      padding: 10px 15px;
+      background-color: #f8f9fa;
+      border-left: 4px solid #a1a1a1;
+      font-style: italic;
+      color: #555;
+      border-radius: 0 4px 4px 0;
+      position: relative;
+      
+      &::before {
+        content: '"';
+        font-size: 24px;
+        color: #a1a1a1;
+        position: absolute;
+        left: 8px;
+        top: -5px;
+        font-family: serif;
+      }
+      
+      &::after {
+        content: '"';
+        font-size: 24px;
+        color: #a1a1a1;
+        position: absolute;
+        right: 8px;
+        bottom: -10px;
+        font-family: serif;
+      }
+    }
+  }
+  
+  .date {
+    margin: 0 0 8px 0;
+    color: @secondary-color;
+    font-size: 14px;
+    font-weight: 500;
+  }
+}
+
+// 加载触发器
+.loadTrigger {
+  position: relative;
+  height: 50px;
+  // display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 20px auto 0 auto;
+  width: auto;
+  min-width: 200px;
+}
+
+// 加载指示器
+.loadingIndicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  
+  p {
+    margin: 0;
+    color: @secondary-color;
+    font-size: 14px;
+    font-family: @primary-font;
+  }
+}
+
+// 没有更多内容指示器
+.noMoreIndicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  p {
+    margin: 0;
+    color: @secondary-color;
+    font-size: 14px;
+    font-family: @primary-font;
+    opacity: 0.7;
+  }
+}
+
+// 加载动画
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid @secondary-color;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
