@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import styles from "./Home.module.less";
 import logo from "/logo.png";
@@ -204,10 +204,10 @@ const Home: React.FC = () => {
             </div>
           </div>
           <img className={styles.imgBelowTitle} src={photo2} alt="homeBg" />
-          <p className={styles.annotation}>
+          <div className={styles.annotation}>
             <p>*《复盘》作于24岁生日，回顾二十年的经历</p>
             <p>*围棋术语：边、角、腹、敲闲、路、受子、猜先、贴目、先于四隅分定势子（出自玄玄棋经，指座子制）、无忧角、双飞翼、天王山、适应手、假眼、滚打包收、愚形、飞、单关、觑、断、断点、挖打、粘连、弃小而不就者有图大之心也（出自玄玄棋经）、弃子、倒扑、活棋、外势。</p>
-          </p>
+          </div>
         </div>
         <div className={`${styles.column3}`}>
           <img src={photo1} alt="homeBg" />
@@ -235,8 +235,14 @@ const Home: React.FC = () => {
       </div>
 
       <div className={styles.imageGrid}>
+        <div
+          className={`${styles.gridItem}`}
+          style={{ aspectRatio: 2, border: '1px solid #ddd' }}
+        >
+          <img style={{ width: '100%', height: '100%' }} src='https://mapmyvisitors.com/map.png?cl=080808&w=300&t=n&d=lGFuoYIEaSY_Ud1iQKz23UTAHC1edlNQeXo3Ybx1M2s&co=9abad9&ct=808080' />
+        </div>
         {activityImages.map((image, index) => (
-          <div
+          index != 0 && <div
             key={index}
             className={`${styles.gridItem} ${styles[`span${image.span}`]}`}
             style={{ aspectRatio: image.aspectRatio }}
