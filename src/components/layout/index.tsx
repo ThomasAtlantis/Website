@@ -8,13 +8,25 @@ const { Header, Content, Footer } = AntdLayout;
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   const currentKey =
-    location.pathname === "/" ? "qingchuan" : location.pathname.slice(1);
+    location.pathname === "/" ? "index" : location.pathname.slice(1);
 
   // 获取当前active的菜单项
   const activeItem = NAVBAR_ITEMS.find(item => item.key === currentKey);
-  const activeTitle = activeItem ? activeItem.label : "Qingchuan";
+  const activeTitle = activeItem ? activeItem.label : "人间纪行";
+
+  // 判断是否为Home页面
+  const isHomePage = location.pathname === "/";
 
   console.log(location.pathname);
+
+  // 如果是Home页面，不显示Header和Footer
+  if (isHomePage) {
+    return (
+      <div className={styles.homeLayout}>
+        {children}
+      </div>
+    );
+  }
 
   return (
     <AntdLayout className={styles.layout}>
@@ -35,7 +47,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         {children}
       </Content>
       <Footer style={{ textAlign: "center" }}>
-        Copyright ©2017-{new Date().getFullYear()} All rights reserved — website design by Shangyu Liu
+        Copyright ©2017-{new Date().getFullYear()} All rights reserved — website designed by Shangyu Liu
       </Footer>
     </AntdLayout>
   );

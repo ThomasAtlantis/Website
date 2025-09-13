@@ -28,14 +28,27 @@
   z-index: 1000;
   background-color: @white-color;
   border-bottom: none;
-  padding: 60px 60px 20px 60px;
+  padding: 60px 60px 40px 60px;
   width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
 }
+
 
 .layout {
   min-height: 100vh;
+  max-width: 1280px;
+  margin: 0 auto;
   background-color: @white-color;
 }
+
+// Home页面专用布局（无导航栏）
+.homeLayout {
+  min-height: 100vh;
+  width: 100%;
+  background-color: @white-color;
+}
+
 
 // 菜单样式
 .menu {
@@ -124,6 +137,7 @@
   width: 100%;
 }
 
+
 .title {
   color: #FFF;
   -webkit-text-stroke-width: 3px;
@@ -133,6 +147,7 @@
   font-style: normal;
   font-weight: 900;
   line-height: normal;
-  margin-top: 10px;
+  margin-top: 30px;
   margin-bottom: -80px;
+  user-select: none;
 }

@@ -24,7 +24,8 @@
     "noUncheckedSideEffectImports": true,
     "paths": {
       "@/*": ["./src/*"],
-      "@data/*": ["./public/data/*"]
+      "@data/*": ["./public/data/*"],
+      "@images/*": ["./public/images/*"]
     }
   },
   "include": ["src"]

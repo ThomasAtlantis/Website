@@ -1,0 +1,687 @@
+// 自定义字体定义
+@font-face {
+  font-family: 'AnJingChenXiuLiZhongXingShu';
+  src: url('/fonts/font.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.home {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 0 20px 20px 20px; // 只保留左右和底部padding
+  color: black;
+  box-sizing: border-box; // 确保padding包含在总宽度内
+  position: relative; // 为logo定位做准备
+  max-width: 1440px; // 设置最大宽度
+  margin: 0 auto; // 居中显示
+  overflow: hidden; // 隐藏超出部分
+  
+  // 垂直居中：当视口高度超过788px时
+  @media (min-height: 788px) {
+    min-height: 100vh;
+    justify-content: center;
+  }
+}
+
+// Logo样式
+.logoContainer {
+  margin-top: 30px;
+  margin-left: 10px;
+  z-index: 20; // 确保在导航栏之上
+  display: flex;
+  align-items: center;
+  gap: 5px; // logo和标题之间的间距
+  
+  // 在大屏幕上调整logo位置
+  @media (min-height: 788px) {
+    top: 30px; // 保持固定位置，不跟随垂直居中
+  }
+}
+
+.logo {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+
+.logoTitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1E1E1E;
+  margin: 0;
+  vertical-align: middle;
+  line-height: 30px;
+  font-family: "HarmonyOS Sans SC";
+  font-weight: 900;
+}
+
+// 导航栏行样式
+.navRow {
+  display: flex;
+  width: 100%;
+  margin-bottom: 0; // 移除底部间距
+  box-sizing: border-box;
+  position: relative; // 相对定位
+}
+
+.navSpacer {
+  flex: 1; // 占据左侧空间
+}
+
+.navContainer {
+  flex: 0 0 auto; // 不伸缩，固定宽度
+  position: absolute; // 绝对定位
+  right: 20px; // 右侧对齐
+  top: 30px; // 顶部对齐
+  z-index: 10; // 确保在内容之上
+  
+  // 在大屏幕上保持固定位置
+  @media (min-height: 788px) {
+    top: 30px; // 保持固定位置，不跟随垂直居中
+  }
+}
+
+.navMenu {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 20px;
+}
+
+.navItem {
+  a {
+    color: #1E1E1E;
+    font-family: "HarmonyOS Sans SC";
+    font-size: 20px;
+    font-weight: 900;
+    text-decoration: none;
+    position: relative;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: -5px;
+      width: 0;
+      height: 2px;
+      background-color: #1E1E1E;
+      transition: width 0.3s ease;
+    }
+    
+    &:hover::after {
+      width: 100%;
+    }
+    
+    &:hover {
+      color: #1E1E1E;
+    }
+  }
+  
+  &.active a {
+    &::after {
+      width: 100%;
+    }
+  }
+}
+
+// 内容行样式
+.contentRow {
+  display: flex;
+  max-height: 655px;
+  flex: 1;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 0; // 移除顶部间距
+  padding-top: 0; // 移除顶部内边距
+}
+
+.title {
+  padding: 0px;
+  font-size: 80px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: left;
+  margin-bottom: 0;
+  font-family: 'AnJingChenXiuLiZhongXingShu', serif;
+  user-select: none;
+}
+
+.aboutButton {
+  background: transparent;
+  border: 2px solid #1E1E1E;
+  color: #1E1E1E;
+  padding: 6px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: "HarmonyOS Sans SC", sans-serif;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin: 0; // 移除margin，由父容器控制间距
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 36px; // 与社交媒体图标总高度一致（32px + 2px边框 + 2px边框）
+  border-radius: 5px; // 与社交媒体图标圆角一致
+  box-sizing: border-box;
+  
+  &:hover {
+    background-color: #1E1E1E;
+    color: white;
+    border: 2px solid black;
+    
+    .arrow {
+      transform: translateX(3px);
+    }
+  }
+
+  &.enterButton {
+      background-color: #1E1E1E;
+      color: white;
+  }
+  
+  &:active {
+    transform: translateY(1px);
+  }
+}
+
+.arrow {
+  font-size: 16px;
+  transition: transform 0.3s ease;
+  display: inline-block;
+}
+
+.homeColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box; // 确保所有列都使用border-box
+}
+
+// 不同宽度的列样式
+.column1 {
+  flex: 0 0 5%;
+  display: flex;
+  flex-direction: column; // 添加flex-direction
+  // align-items: center; // 垂直居中
+  justify-content: center;
+  height: 100%;
+  min-height: 655px;
+  box-sizing: border-box; // 确保盒模型一致
+  
+  p {
+    line-height: 1.2;
+    font-size: 14px;
+    margin-left: 10px;
+    word-break: break-word;
+    writing-mode: vertical-rl; // 纵向排列文字
+    text-orientation: mixed; // 字符保持正常方向
+    transform: rotate(180deg); // 旋转180度，让文字从下往上阅读
+  }
+}
+
+.column2 {
+  flex: 0 0 40%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; // 左对齐
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.column3 {
+  flex: 0 0 18%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; // 顶部对齐
+  box-sizing: border-box;
+  padding-top: 0;
+  margin-top: -60px;
+  padding-left: 10px;
+  img {
+    width: 100%;
+    height: 68%;
+    object-fit: cover;
+  }
+  .poemSection {
+    padding-right: 0;
+  }
+}
+
+.column4 {
+  padding-left: 10px;
+  flex: 0 0 17%;
+  position: relative; // 为绝对定位的图片提供参考
+  
+  img {
+    position: absolute;
+    left: 10px;
+    top: 10%;
+    height: 80%;
+    width: calc(217.64% - 10px);
+    object-fit: cover;
+    z-index: 1;
+  }
+}
+
+.column5 {
+  flex: 0 0 20%;
+  position: relative;
+  z-index: 2;
+  .poemSection {
+    position: absolute;
+    bottom: 0;
+    left: 10px;
+    width: 100%;
+    background-color: white;
+    border: none;
+    height: 30%;
+  }
+}
+
+.homeBg {
+  width: 100%;
+  object-fit: cover;
+}
+
+.poemSection {
+  width: 100%;
+  padding: 10px;
+  padding-bottom: 0px;
+  box-sizing: border-box;
+  font-size: 12px;
+  border-left: 1px solid #919191;
+  user-select: none;
+  .poemLine {
+    padding-top: 0;
+    margin-top: -12px;
+  }
+}
+
+.imgBelowTitle {
+  width: 100%;
+  max-height: 100px;
+  object-fit: cover;
+}
+
+.leftColumnText {
+  margin-left: 0;
+  padding-left: 0;
+  color: #919191;
+  text-transform: uppercase;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.2;
+  user-select: none;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.poemColumn {
+  flex: 1;
+}
+
+.footer {
+  border-top: 1px solid #919191;
+  position: absolute;
+  bottom: 0;
+  left: calc(5% + 20px);
+  width: calc(55% - 30px);
+  text-align: left;
+  font-size: 12px;
+  color: #919191;
+  font-family: "HarmonyOS Sans SC";
+  font-weight: 500;
+  p {
+    padding: 0;
+    margin-bottom: 10px;
+  }
+}
+
+// 确保在大屏幕上footer仍然正确定位
+@media (min-width: 1440px) {
+  .footer {
+    left: calc(5% + 20px + (100vw - 1440px) / 2);
+  }
+}
+
+// 在垂直居中布局下调整footer位置
+@media (min-height: 788px) {
+  .footer {
+    position: absolute;
+    bottom: 20px; // 保持距离底部的固定距离
+  }
+}
+
+.titleContainer {
+  margin-bottom: 30px;
+}
+
+.socialSection {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin: 10px 0;
+}
+
+.socialIcons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.socialIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 2px solid #1E1E1E;
+  border-radius: 5px;
+  background: transparent;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  box-sizing: border-box; // 确保边框包含在总尺寸内
+  cursor: pointer;
+  
+  // 如果是button元素，重置button默认样式
+  &.button {
+    border: 2px solid #1E1E1E;
+    padding: 0;
+    margin: 0;
+    font-family: inherit;
+  }
+  
+  &:hover {
+    background-color: #1E1E1E;
+    
+    img {
+      filter: brightness(0) invert(1);
+    }
+  }
+  
+  img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    transition: filter 0.3s ease;
+  }
+}
+
+// 微信二维码弹窗样式
+.qrModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.qrModalContent {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  animation: modalAppear 0.3s ease-out;
+}
+
+@keyframes modalAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.qrCloseButton {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #666;
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background-color: #f5f5f5;
+    color: #333;
+  }
+}
+
+.qrTitle {
+  margin: 0 0 20px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1E1E1E;
+  font-family: "HarmonyOS Sans SC", sans-serif;
+}
+
+.qrImage {
+  width: 200px;
+  height: 200px;
+  object-fit: contain;
+  margin: 0 auto 20px auto;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: white;
+}
+
+.qrDescription {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+  font-family: "HarmonyOS Sans SC", sans-serif;
+  line-height: 1.4;
+}
+
+// 复制成功提示样式
+.copyToast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1001;
+  animation: toastSlideIn 0.3s ease-out;
+}
+
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.copyToastContent {
+  background: #1E1E1E;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-family: "HarmonyOS Sans SC", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.copyToastIcon {
+  color: #4CAF50;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.copyToastText {
+  white-space: nowrap;
+}
+
+// 自定义Tooltip样式
+.tooltipWrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 8px;
+  padding: 6px 12px;
+  background-color: #1E1E1E;
+  color: white;
+  font-size: 12px;
+  font-family: "HarmonyOS Sans SC", sans-serif;
+  font-weight: 500;
+  border-radius: 6px;
+  white-space: nowrap;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  animation: tooltipFadeIn 0.2s ease-out;
+  
+  // 小箭头
+  &::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: #1E1E1E;
+  }
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.imageGrid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr); // 6列网格
+  gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  z-index: 1; // 确保在其他内容之上
+}
+
+.gridItem {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+  }
+}
+
+.gridImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+  
+  .gridItem:hover & {
+    transform: scale(1.05);
+  }
+}
+
+// 网格项目跨度类
+.span1 {
+  grid-column: span 1;
+}
+
+.span2 {
+  grid-column: span 2;
+}
+
+.span3 {
+  grid-column: span 3;
+}
+
+// 响应式调整
+@media (max-width: 768px) {
+  .imageGrid {
+    grid-template-columns: repeat(3, 1fr); // 移动端3列
+    gap: 8px;
+    padding: 0 10px;
+    top: calc(100vh - 150px); // 调整位置
+  }
+  
+  .span2 {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 480px) {
+  .imageGrid {
+    grid-template-columns: repeat(2, 1fr); // 小屏幕2列
+    gap: 6px;
+    top: calc(100vh - 120px); // 调整位置
+  }
+  
+  .span2 {
+    grid-column: span 2; // 在小屏幕上，宽图片占满2列
+  }
+}
+
+.annotation {
+  padding-right: 30px;
+  text-align: justify;
+  font-size: 12px;
+  color: #919191;
+  font-family: "HarmonyOS Sans SC";
+  font-weight: 500;
+  p {
+    padding: 0;
+    margin-bottom: 10px;
+  }
+}
