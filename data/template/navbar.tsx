@@ -1,7 +1,7 @@
 const NAVBAR_ITEMS = [
   {
-    key: "qingchuan",
-    label: "Qingchuan",
+    key: "index",
+    label: "人间纪行",
   },
   {
     key: "technology",
@@ -30,7 +30,7 @@ const NAVBAR_ITEMS = [
 ];
 
 NAVBAR_ITEMS.forEach((item: any) => {
-  if (item.key === "qingchuan") {
+  if (item.key === "index") {
     item.href = `/`;
   } else {
     item.href = `/${item.key}`;
