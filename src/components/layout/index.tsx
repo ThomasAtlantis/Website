@@ -46,7 +46,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         <h1 className={styles.title}>{activeTitle}</h1>
         {children}
       </Content>
-      <Footer style={{ textAlign: "center" }}>
+      <Footer className={styles.footer}>
         Copyright ©2017-{new Date().getFullYear()} All rights reserved — website designed by Shangyu Liu
       </Footer>
     </AntdLayout>

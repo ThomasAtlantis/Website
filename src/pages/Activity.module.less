@@ -4,8 +4,8 @@
 .activityContainer {
   display: flex;
   position: relative;
-  min-height: 100vh;
-  width: 100%; // 使用全宽，因为父容器已经限制了宽度
+  width: 100%;
+  flex: 1;
 }
 
 .masonry {
@@ -13,22 +13,39 @@
   position: relative;
   padding: 0;
   width: 100%;
+  min-height: 0;
 }
 
 .masonryItem {
   position: absolute;
-  width: 200px; // 默认宽度，会被JavaScript动态调整
+  width: calc(100% / var(--num-columns, 4));
+  padding: 0px 10px 0px 10px;
   font-family: @primary-font;
-  opacity: 0; // 初始隐藏，等待JavaScript布局完成后显示
   transition: opacity 0.2s ease-in-out;
   
-  img {
+  .imageContainer {
     width: 100%;
-    height: auto;
-    object-fit: cover;
-    display: block;
+    aspect-ratio: var(--aspect-ratio, 1);
     margin-bottom: 10px;
+    position: relative;
+    background-size: cover;
+    background-position: center;
     border-radius: 4px;
+    
+    // Fallback for browsers that don't support aspect-ratio
+    @supports not (aspect-ratio: 1) {
+      height: 0;
+      padding-bottom: calc(100% / var(--aspect-ratio, 1));
+    }
+    
+    img {
+      width: 100%;
+      height: auto;
+      object-fit: cover;
+      display: block;
+      border-radius: 4px;
+      transition: opacity 0.3s ease-in-out;
+    }
   }
   
   h2 {
@@ -86,61 +103,25 @@
     font-size: 14px;
     font-weight: 500;
   }
-}
-
-// 加载触发器
-.loadTrigger {
-  position: relative;
-  height: 50px;
-  // display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 20px auto 0 auto;
-  width: auto;
-  min-width: 200px;
-}
-
-// 加载指示器
-.loadingIndicator {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
   
-  p {
-    margin: 0;
-    color: @secondary-color;
+  .content {
+    margin: 10px 0 0 0;
+    line-height: 1.6;
+    color: #333;
     font-size: 14px;
-    font-family: @primary-font;
+    text-align: justify;
+    max-height: 600px;
+    overflow-y: auto;
   }
 }
 
-// 没有更多内容指示器
-.noMoreIndicator {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  
-  p {
-    margin: 0;
-    color: @secondary-color;
-    font-size: 14px;
-    font-family: @primary-font;
-    opacity: 0.7;
-  }
-}
-
-// 加载动画
-.spinner {
-  width: 24px;
-  height: 24px;
-  border: 2px solid #f3f3f3;
-  border-top: 2px solid @secondary-color;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+.loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  color: lightgray;
+  height: 30px;
+  background-color: white;
+  text-align: center;
 }
