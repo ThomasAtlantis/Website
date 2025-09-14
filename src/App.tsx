@@ -7,6 +7,7 @@ import Technology from "@/pages/Technology";
 import Project from "@/pages/Project";
 import Activity from "@/pages/Activity";
 import About from "@/pages/About";
+import DetailArticle from "@/pages/DetailArticle";
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/literature" element={<Literature />} />
+          <Route path="/literature/:id" element={<DetailArticle />} />
           <Route path="/art" element={<Art />} />
           <Route path="/technology" element={<Technology />} />
           <Route path="/project" element={<Project />} />

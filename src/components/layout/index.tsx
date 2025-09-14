@@ -17,6 +17,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // 判断是否为Home页面
   const isHomePage = location.pathname === "/";
 
+  // 判断是否为详情页面（包含ID参数的页面）
+  const isDetailPage = location.pathname.includes("/literature/") && location.pathname !== "/literature";
+
   console.log(location.pathname);
 
   // 如果是Home页面，不显示Header和Footer
@@ -43,7 +46,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         </ul>
       </Header>
       <Content className={styles.content}>
-        <h1 className={styles.title}>{activeTitle}</h1>
+        {!isDetailPage && <h1 className={styles.title}>{activeTitle}</h1>}
         {children}
       </Content>
       <Footer className={styles.footer}>

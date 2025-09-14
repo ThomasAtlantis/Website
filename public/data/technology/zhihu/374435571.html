@@ -1,0 +1,115 @@
+<p data-pid="2TeUkGvl"><b>2024年8月26日更新</b></p><ul><li data-pid="36g_0fuQ">ESSID是否是「off/any」并不是判断wlan0是否打开的关键，还是要看iwlist wlan0 scan是否能正常工作。</li><li data-pid="YcTwXNoI">文中提到的SSID名称不能有下划线和连字符的BUG，可能只是由于 interfaces 这个文件的语法导致的。其实在wlan0开启之后，我们还是可以使用修改 /etc/wpa_supplicant/wpa_supplicant.conf 文件的方法，这里因为SSID在双引号内，不存在以上BUG。</li><li data-pid="G4kVenTF">参照评论区同志的建议，目前我们可以使用raspi-config命令进入类图形化界面设置WiFi所在区域：Network Options-&gt;Wireless LAN-&gt;CN China。</li></ul><blockquote data-pid="w37h3A6D">Raspberry Pi 设备支持双频段无线（Raspberry Pi 3B+、Raspberry Pi 4、Compute Module 4 和 Raspberry Pi 400）自动禁用网络，直到你分配一个无线局域网国家/地区</blockquote><p data-pid="c1rPnaBS">至于为什么需要这么做，可能是由于不同国家和地区的ISM频段划分可能有区别。网上有教程说将地区设置成US美国也可以正常工作，我舍友告诉我美国和中国的频段是兼容的，有可能是这个原因。</p><ul><li data-pid="IsbESXUd">如果service networking restart失败了，查看日志发现提示You may have another wpa_supplicant process already running，那么可以参考这个<a href="http://link.zhihu.com/?target=https%3A//unix.stackexchange.com/questions/624057/failed-to-initialize-control-interface-run-wpa-supplicant-in-journal-but-yet-wl" class=" wrap external" target="_blank" rel="nofollow noreferrer">回答</a>：</li></ul><div class="highlight"><pre><code class="language-text"><span></span>sudo systemctl stop NetworkManager
+sudo killall wpa_supplicant
+service networking restart
+</code></pre></div><hr><p data-pid="F0oBc_N6">我的树莓派此前一直都无法开机自动连接无线网，所以做实验一直是将电脑搬到路由器旁边，苟且了一天，我决定和这个问题正面对线。首先先说一下一般配置无线网的思路，参考这篇博客：<a href="http://link.zhihu.com/?target=https%3A//www.cnblogs.com/playboysnow/p/4987103.html" class=" wrap external" target="_blank" rel="nofollow noreferrer">树莓派自动连接WiFi</a>。</p><p data-pid="xd6b8PMC">一般来说我们可以修改 /etc/wpa_supplicant/wpa_supplicant.conf 这个文件来实现自动连接WiFi（也有的博客说这个wpa_supplicant.conf文件也可以在烧写系统到SD卡的时候，在boot文件夹下创建，但我没试过不保证对。</p><div class="highlight"><pre><code class="language-json"><span></span><span class="err">ctrl_interface=DIR=/var/run/wpa_supplicant</span> <span class="err">GROUP=netdev</span>
+<span class="err">update_config=</span><span class="mi">1</span>
+
+<span class="err">network=</span><span class="p">{</span>
+       <span class="err">ssid=</span><span class="nt">"wifi_ssid"</span>
+       <span class="err">psk=</span><span class="s2">"wifi_password"</span>
+<span class="p">}</span>
+</code></pre></div><p data-pid="tCYUMSqA">使用上述方法我的树莓派是无法直接连接WiFi的，这是由于<b>无线网卡没有开启</b>。测试以下命令，</p><div class="highlight"><pre><code class="language-text"><span></span>iwlist wlan0 scan
+----------------------------------------------------
+Interface doesn't support scanning : Network is down
+</code></pre></div><p data-pid="wXNPZiWm">如果出现上述回显就说明内置无线网卡没有开启。使用如下命令，</p><div class="highlight"><pre><code class="language-text"><span></span>ifconfig wlan0 up
+---------------------------------------------------
+SIOCSIFFLAGS: Operation not possible due to RF-kill
+</code></pre></div><p data-pid="dUaZ9h5t">如果出现上述回显可参考<a href="http://link.zhihu.com/?target=https%3A//blog.csdn.net/weixin_39584758/article/details/80622675" class=" wrap external" target="_blank" rel="nofollow noreferrer">这篇博客</a>，我们使用如下命令去查看无线网卡的状态，</p><div class="highlight"><pre><code class="language-text"><span></span>rfkill list all
+------------------------
+0: phy0: Wireless LAN
+	Soft blocked: yes
+	Hard blocked: no
+1: hci0: Bluetooth
+	Soft blocked: no
+	Hard blocked: no
+</code></pre></div><p data-pid="WK6YVl0y">从上述结果可以看出，无线网被soft block掉了，执行以下命令，</p><div class="highlight"><pre><code class="language-text"><span></span>rfkill unblock wifi
+</code></pre></div><p data-pid="2H47Z3Js">之后再查看一遍无线网卡状态，发现所有的block都被设为了no</p><div class="highlight"><pre><code class="language-text"><span></span>rfkill list all
+------------------------
+0: phy0: Wireless LAN
+	Soft blocked: no
+	Hard blocked: no
+1: hci0: Bluetooth
+	Soft blocked: no
+	Hard blocked: no
+</code></pre></div><p data-pid="YHrmroTL">此时我们可以重新使用下面的命令开启无线网卡</p><div class="highlight"><pre><code class="language-text"><span></span>ifconfig wlan0 up
+</code></pre></div><p data-pid="ZFrsXhAy">然后我们重启以下设备，然后通过以下命令测试wlan0是否正常工作</p><div class="highlight"><pre><code class="language-text"><span></span>iwconfig wlan0
+----------------------------------------------------------------------------
+wlan0     IEEE 802.11  ESSID:"Wifi SSID"
+          Mode:Managed  Frequency:2.462 GHz  Access Point: 46:CE:E2:15:0E:02
+          Bit Rate=65 Mb/s   Tx-Power=31 dBm
+          Retry short limit:7   RTS thr:off   Fragment thr:off
+          Encryption key:off
+          Power Management:on
+          Link Quality=68/70  Signal level=-42 dBm
+          Rx invalid nwid:0  Rx invalid crypt:0  Rx invalid frag:0
+          Tx excessive retries:2  Invalid misc:0   Missed beacon:0
+</code></pre></div><p data-pid="dStfDQK0">如果ESSID的值能够显示出来就代表成功，如果是「off/any」就说明还是失败。至此，正常来讲网络就没问题了，但我的树莓派还是有问题。我发现当连着网线的时候，使用ifconfig查看网络状态，发现有线网和无线网都没有问题；当拔掉网线的时候，发现有线网掉了，无线网也掉了！很莫名其妙啊，我于是怀疑网络状态变化导致了网卡集体更新，然后又有什么配置错误，导致WiFi更新不出来。参考开篇提到的那个博客，我又修改了/etc/network/interfaces这个文件。</p><div class="highlight"><pre><code class="language-text"><span></span>auto lo
+iface lo inet loopback
+
+auto eth0
+iface eth0 inet dhcp
+
+allow-hotplug wlan0
+auto wlan0
+iface wlan0 inet dhcp
+    wpa-ssid YOUR-SSID-HERE
+    wpa-psk YOUR-PASSWORD-HERE
+</code></pre></div><p data-pid="yl_4sJ8T">修改为以上后，使用 service networking restart 重启服务，发现问题依旧。在网上一番苦找，我发现了这篇宝藏文章：<a href="http://link.zhihu.com/?target=https%3A//blog.csdn.net/espressogelato/article/details/108614136" class=" wrap external" target="_blank" rel="nofollow noreferrer">树莓派开机自动连接WiFi及树莓派设置固定IP地址</a>。作者提到：</p><blockquote data-pid="hehifU4E">除非插着网线，才能ssh到无线的IP，不插网线，没法单独连到无线的IP</blockquote><p data-pid="X5G93_5w">问题出奇的一致，看来是个共性的BUG。作者提到一个关键点，<b>WiFi名字里不能有下划线！</b></p><p data-pid="MI6sGwby">然而，我实验室WiFi名字里也没有下划线啊，但是有「-」，我于是猜想连接符也不能有。考虑到课程做demo的时候很可能网络环境不佳，我最好是能够使用自己手机的热点来搭建局域网，这样我也好控制WiFi的名字。那么问题来了，没有路由器了，怎么知道树莓派的IP？这篇博客：<a href="http://link.zhihu.com/?target=https%3A//blog.csdn.net/ddi9477/article/details/102245869" class=" wrap external" target="_blank" rel="nofollow noreferrer">如何查看连接到手机热点的ip地址</a> 提到的方法不太实用，我要另辟蹊径。</p><p data-pid="f2NLHkTg">我手机（Mi10 Pro）开启热点后，树莓派和电脑都连接到了同一个热点下，发现在手机热点的「已连接设备」处只能看到设备的MAC地址。我于是打算做<b>局域网嗅探</b>！在我的Mac电脑上，使用以下命令安装nmap工具</p><div class="highlight"><pre><code class="language-text"><span></span>brew install nmap
+--------------------------------------------------------------------------------
+==&gt; Downloading https://mirrors.ustc.edu.cn/homebrew-bottles/bottles/nmap-7.91.b
+######################################################################## 100.0%
+==&gt; Pouring nmap-7.91.big_sur.bottle.tar.gz
+Error: The `brew link` step did not complete successfully
+The formula built, but is not symlinked into /usr/local
+Could not symlink share/man/de/man1/nmap.1
+/usr/local/share/man/de/man1 is not writable.
+
+You can try again using:
+  brew link nmap
+==&gt; Summary
+   /usr/local/Cellar/nmap/7.91: 826 files, 26.6MB
+</code></pre></div><p data-pid="qEAEv2Vn">发现这里link的时候报错了啊，于是按照提示重新进行链接</p><div class="highlight"><pre><code class="language-text"><span></span>brew link nmap
+-------------------------------------------------
+Linking /usr/local/Cellar/nmap/7.91...
+Error: Could not symlink share/man/de/man1/nmap.1
+/usr/local/share/man/de/man1 is not writable.
+</code></pre></div><p data-pid="BCyZNoZo">发现是写权限不够，于是用了一下sudo</p><div class="highlight"><pre><code class="language-text"><span></span>sudo brew link nmap
+-------------------------------------------------------------------------------
+Password:
+Error: Running Homebrew as root is extremely dangerous and no longer supported.
+As Homebrew does not drop privileges on installation you would be giving all
+build scripts full access to your system.
+</code></pre></div><p data-pid="fzpYhaW1">很危险啊，发现自己安全意识淡薄。Mac已经阻止了我使用sudo去链接网上下下来的脚本。那么最好的办法就是修改文件夹权限咯。这时其实nmap已经编译完成，只剩下把它链接成系统的可执行命令，索性</p><div class="highlight"><pre><code class="language-text"><span></span>sudo chmod -R 777 /usr/local/share/man/de/man1
+</code></pre></div><p data-pid="xQSIE0Fp">然后再进行链接，nmap就安装好了</p><div class="highlight"><pre><code class="language-text"><span></span>brew link nmap
+----------------------------------------------------------
+Linking /usr/local/Cellar/nmap/7.91... 25 symlinks created
+</code></pre></div><p data-pid="l_QRUtyy">我们检查一下电脑所在的局域网的网段</p><div class="highlight"><pre><code class="language-text"><span></span>ifconfig | grep "inet"
+----------------------------------------------------------------------------
+	inet 127.0.0.1 netmask 0xff000000
+	inet6 ::1 prefixlen 128
+	inet6 fe80::1%lo0 prefixlen 64 scopeid 0x1
+	inet6 fe80::aede:48ff:fe00:1122%en5 prefixlen 64 scopeid 0x4
+	inet6 fe80::1c27:908d:9929:f5cd%en0 prefixlen 64 secured scopeid 0x6
+	inet 192.168.144.235 netmask 0xffffff00 broadcast 192.168.144.255
+	inet6 fe80::6084:3cff:fe2e:d051%awdl0 prefixlen 64 scopeid 0xc
+	inet6 fe80::6084:3cff:fe2e:d051%llw0 prefixlen 64 scopeid 0xd
+	inet6 fe80::c364:6e2e:2b42:c267%utun0 prefixlen 64 scopeid 0xe
+	inet6 fe80::d5b2:3f8a:eab0:c8b7%utun1 prefixlen 64 scopeid 0xf
+</code></pre></div><p data-pid="WdA3dGEn">这里可以看到本机的ip地址为 192.168.144.235 ，子网掩码为 0xffffff00，也就是说CIDR表示为 /24。我们使用如下命令扫描局域网内所有IP：</p><div class="highlight"><pre><code class="language-text"><span></span>nmap -sP 192.168.144.255/24
+-----------------------------------------------------------------
+Starting Nmap 7.91 ( https://nmap.org ) at 2021-05-22 18:41 CST
+Nmap scan report for 192.168.144.10
+Host is up (0.13s latency).
+Nmap scan report for 192.168.144.204
+Host is up (0.014s latency).
+Nmap scan report for 192.168.144.235
+Host is up (0.00083s latency).
+Nmap done: 256 IP addresses (3 hosts up) scanned in 94.62 seconds
+</code></pre></div><p data-pid="rHBsxOtP">这个过程还是很漫长的，花了1分半，我不知道nmap的底层原理是什么，我只知道写个for循环遍历每个IP挨个ping一遍也是可行的。从上述结果看，235就是我们的电脑，尝试ssh登录会发现10实际上是我们的树莓派。至此我们证明了，<b>WiFi名字不仅不能有下划线，也不能有连字符！</b>经过我的试验，可以只配置interfaces那个文件，而不配置wpa_supplicant。</p><p data-pid="3QicSe4F"><b>#小插曲#</b> 有人可能觉得我们貌似也可以使用arp命令：</p><div class="highlight"><pre><code class="language-text"><span></span>arp -a
+---------------------------------------------------------------------------
+? (192.168.144.10) at dc:a6:32:c4:a7:eb on en0 ifscope [ethernet]
+? (192.168.144.204) at 46:ce:e2:15:e:2 on en0 ifscope [ethernet]
+? (192.168.144.235) at 14:7d:da:9a:e0:6 on en0 ifscope permanent [ethernet]
+? (224.0.0.251) at 1:0:5e:0:0:fb on en0 ifscope permanent [ethernet]
+? (239.255.255.250) at 1:0:5e:7f:ff:fa on en0 ifscope permanent [ethernet]
+</code></pre></div><p data-pid="_Mcb6OWB">然后对照手机上MAC地址的顺序，也可以发现树莓派是10。这么做的优点是，树莓派的MAC地址一般不会变，只要记住它，使用arp命令更快捷。这样做的缺点是需要记住连接顺序来判定树莓派的MAC地址，因为小米的已连接设备的管理页面是不标记MAC的归属的。但实际上这么做是不行的，因为ARP命令查询的是ARP高速缓存中的信息，如果不是我刚才ping过这些地址，arp也很有可能查不到正确的IP。</p><p data-pid="uI6eSxPj">我终于可以回到工位上喝茶了！nmap工具的使用可以参考<a href="http://link.zhihu.com/?target=https%3A//www.jianshu.com/p/874405b0a6ae" class=" wrap external" target="_blank" rel="nofollow noreferrer">nmap基本使用方法</a>。感觉在网络攻防的时候这是一个必要的工具。想象一下你来到一家奶茶店，打开笔记本电脑连上它们的免费WiFi，然后扫描得到店里所有连了WiFi的人的IP。接下来使用漏洞扫描工具自动检测它们设备上的网络薄弱点。万一发现某个学计算机的兄弟，电脑开了ssh服务，用户名密码还都是root或者admin，那岂不是 ... [doge]</p><p></p>

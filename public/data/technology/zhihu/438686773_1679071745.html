@@ -1,0 +1,261 @@
+<p data-pid="N7sPXQkZ">强烈建议贵乎不要推送这种钓鱼引战的问题了，认真回答有错么？回答两千个复制粘贴怎么样？大家是来交流的不是来炫技和抖机灵的，求同存异取长补短啊！看了那么多认真的答主，评论没有几个友好的，你们那么厉害怎么不来答？</p><hr><p data-pid="2Tno-Lkk">我一直都对各种语言的语法糖和优雅的小技巧很痴迷。这里分享一些Python的code trick，主要来自大佬<a href="https://link.zhihu.com/?target=https%3A//github.com/LandGrey" class=" wrap external" target="_blank" rel="nofollow noreferrer">LandGrey</a>的开源仓库，我也fork了一下并且加入了一些私货。长期积累和维护，谈不上非常炫技，但很有趣、很有用也很优雅：<a href="https://link.zhihu.com/?target=https%3A//github.com/ThomasAtlantis/PythonTricks" class=" wrap external" target="_blank" rel="nofollow noreferrer">ThomasAtlantis/PythonTricks</a></p><h2>命令行</h2><h3>非交互式执行代码</h3><div class="highlight"><pre><code class="language-python"><span></span><span class="c1"># code-1</span>
+<span class="n">python</span> <span class="o">-</span><span class="n">c</span> <span class="s2">"import os;os.popen('calc')"</span>
+
+<span class="c1"># note-1</span>
+<span class="n">打开计算器</span><span class="p">(</span><span class="n">Windows</span> <span class="n">操作系统</span><span class="p">)</span>
+
+
+<span class="c1"># code-2</span>
+<span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">timeit</span> <span class="o">-</span><span class="n">n</span> <span class="mi">1</span> <span class="o">-</span><span class="n">r</span> <span class="mi">1</span> <span class="o">-</span><span class="n">s</span> <span class="s2">"import os"</span> <span class="s2">"import platform"</span> <span class="s2">"print(platform.system())"</span> <span class="s2">"os.popen('calc')"</span>
+
+<span class="c1"># output-2</span>
+<span class="n">Windows</span>
+<span class="mi">1</span> <span class="n">loops</span><span class="p">,</span> <span class="n">best</span> <span class="n">of</span> <span class="mi">1</span><span class="p">:</span> <span class="mi">401</span> <span class="n">msec</span> <span class="n">per</span> <span class="n">loop</span>
+
+<span class="c1"># note-2</span>
+<span class="n">最后会打开计算器</span><span class="p">(</span><span class="n">Windows</span> <span class="n">操作系统</span><span class="p">)</span>
+</code></pre></div><h3>简易HTTPServer</h3><div class="highlight"><pre><code class="language-python"><span></span><span class="c1"># code</span>
+<span class="n">python2</span> <span class="o">-</span><span class="n">m</span> <span class="n">SimpleHTTPServer</span> <span class="mi">53</span>
+<span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">http</span><span class="o">.</span><span class="n">server</span> <span class="mi">53</span>
+
+<span class="c1"># note</span>
+<span class="n">监听的默认地址是</span> <span class="mf">0.0</span><span class="o">.</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">对外开放</span><span class="p">,</span> <span class="n">可目录浏览</span>
+</code></pre></div><h2>一行代码</h2><h3>最值</h3><div class="highlight"><pre><code class="language-python"><span></span><span class="c1"># code heapq.nsmallest/heapq.nlargest</span>
+<span class="kn">import</span> <span class="nn">heapq</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">heapq</span><span class="o">.</span><span class="n">nlargest</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="p">[{</span><span class="s1">'S'</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">'H'</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span> <span class="p">{</span><span class="s1">'S'</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span> <span class="s1">'H'</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="s1">'S'</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">'H'</span><span class="p">:</span> <span class="mi">2</span><span class="p">}],</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s1">'S'</span><span class="p">]))</span>
+
+<span class="c1"># output</span>
+<span class="p">[{</span><span class="s1">'H'</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'S'</span><span class="p">:</span> <span class="mi">7</span><span class="p">},</span> <span class="p">{</span><span class="s1">'H'</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">'S'</span><span class="p">:</span> <span class="mi">5</span><span class="p">}]</span>
+
+<span class="c1"># note</span>
+<span class="n">取最大</span><span class="o">/</span><span class="n">最小的</span> <span class="n">N</span> <span class="n">个值</span>
+</code></pre></div><h3>逆序</h3><div class="highlight"><pre><code class="language-python"><span></span><span class="c1"># code-1 reversed 逆序</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">reversed</span><span class="p">([</span><span class="s1">'L'</span><span class="p">,</span> <span class="s1">'G'</span><span class="p">,</span> <span class="s1">'PK'</span><span class="p">])))</span>
+
+<span class="c1"># output-1</span>
+<span class="p">[</span><span class="s1">'PK'</span><span class="p">,</span> <span class="s1">'G'</span><span class="p">,</span> <span class="s1">'L'</span><span class="p">]</span>
+
+
+<span class="c1"># code-2 Slice 逆序</span>
+<span class="nb">print</span><span class="p">([</span><span class="s1">'L'</span><span class="p">,</span> <span class="s1">'G'</span><span class="p">,</span> <span class="s1">'PK'</span><span class="p">][::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+<span class="c1"># output-2</span>
+<span class="p">[</span><span class="s1">'PK'</span><span class="p">,</span> <span class="s1">'G'</span><span class="p">,</span> <span class="s1">'L'</span><span class="p">]</span>
+</code></pre></div><h3>碾平</h3><div class="highlight"><pre><code class="language-python"><span></span><span class="c1"># code</span>
+<span class="n">s</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="mi">7</span><span class="p">],</span> <span class="mi">8</span><span class="p">],</span> <span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]]</span>
+<span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">[</span><span class="n">y</span> <span class="k">for</span> <span class="n">_x</span> <span class="ow">in</span> <span class="n">x</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">f</span><span class="p">(</span><span class="n">_x</span><span class="p">)]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span> <span class="k">else</span> <span class="p">[</span><span class="n">x</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+
+<span class="c1"># output</span>
+<span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+</code></pre></div><h3>真假</h3><div class="highlight"><pre><code class="language-python"><span></span><span class="c1"># code for python2</span>
+<span class="kc">True</span> <span class="o">-=</span> <span class="mi">1</span>
+<span class="nb">print</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="kc">True</span> <span class="o">==</span> <span class="kc">False</span><span class="p">)</span>
+
+<span class="c1"># output</span>
+<span class="mi">0</span>
+<span class="kc">True</span>
+
+<span class="c1"># note</span>
+<span class="n">python</span> <span class="mf">2.</span><span class="n">x</span> <span class="n">中</span><span class="p">,</span> <span class="kc">True</span> <span class="n">和</span> <span class="kc">False</span> <span class="n">都是变量</span><span class="p">,</span> <span class="n">可以被改变</span>
+</code></pre></div><h3>去重</h3><div class="highlight"><pre><code class="language-python"><span></span><span class="c1"># code</span>
+<span class="n">array</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'c'</span><span class="p">,</span> <span class="s1">'a'</span><span class="p">,</span> <span class="s1">'c'</span><span class="p">,</span> <span class="s1">'d'</span><span class="p">,</span> <span class="s1">'b'</span><span class="p">,</span> <span class="s1">'b'</span><span class="p">,</span> <span class="s1">'a'</span><span class="p">,</span> <span class="s1">'a'</span><span class="p">,</span> <span class="s1">'f'</span><span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">array</span><span class="p">)))</span>
+
+<span class="n">uniq</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="p">[</span><span class="n">uniq</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">array</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">uniq</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">uniq</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">([</span><span class="n">x</span> <span class="k">for</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">array</span><span class="p">)</span> <span class="k">if</span> <span class="n">array</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="n">y</span><span class="p">])</span>
+
+<span class="c1"># output</span>
+<span class="p">[</span><span class="s1">'a'</span><span class="p">,</span> <span class="s1">'c'</span><span class="p">,</span> <span class="s1">'b'</span><span class="p">,</span> <span class="s1">'d'</span><span class="p">,</span> <span class="s1">'f'</span><span class="p">]</span>
+<span class="p">[</span><span class="s1">'c'</span><span class="p">,</span> <span class="s1">'a'</span><span class="p">,</span> <span class="s1">'d'</span><span class="p">,</span> <span class="s1">'b'</span><span class="p">,</span> <span class="s1">'f'</span><span class="p">]</span>
+<span class="p">[</span><span class="s1">'c'</span><span class="p">,</span> <span class="s1">'a'</span><span class="p">,</span> <span class="s1">'d'</span><span class="p">,</span> <span class="s1">'b'</span><span class="p">,</span> <span class="s1">'f'</span><span class="p">]</span>
+
+<span class="c1"># note</span>
+<span class="n">依次对应</span><span class="p">:</span>
+<span class="n">去重但不保序</span>
+<span class="n">去重且保序</span>
+<span class="n">去重且保序</span>
+</code></pre></div><h3>时间戳</h3><div class="highlight"><pre><code class="language-python"><span></span><span class="c1"># code</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">"%Y%m</span><span class="si">%d</span><span class="s2">-%H:%M:%S"</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())))</span>
+
+<span class="c1"># output</span>
+<span class="mi">20190101</span><span class="o">-</span><span class="mi">17</span><span class="p">:</span><span class="mi">12</span><span class="p">:</span><span class="mi">14</span>
+</code></pre></div><h3>彩蛋攻击</h3><div class="highlight"><pre><code class="language-python"><span></span><span class="c1"># code for python2</span>
+<span class="p">[</span><span class="n">reload</span><span class="p">(</span><span class="nb">__import__</span><span class="p">(</span><span class="s2">"YW50aWdyYXZpdHk="</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">"base64"</span><span class="p">)))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">666</span><span class="p">)]</span>
+
+<span class="c1"># code for python3</span>
+<span class="p">[</span><span class="nb">__import__</span><span class="p">(</span><span class="s2">"imp"</span><span class="p">)</span><span class="o">.</span><span class="n">reload</span><span class="p">(</span><span class="nb">__import__</span><span class="p">(</span><span class="s2">"antigravity"</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">666</span><span class="p">)]</span>
+
+<span class="c1"># note</span>
+<span class="n">一个内置彩蛋模块的</span><span class="s2">"拒绝服务攻击"</span><span class="p">,</span> <span class="n">谨慎运行</span><span class="err">!</span>
+</code></pre></div><h3>执行代码</h3><div class="highlight"><pre><code class="language-python"><span></span><span class="c1"># code</span>
+<span class="n">exec</span><span class="p">(</span><span class="s2">"print('love ' + s)"</span><span class="p">,</span> <span class="p">{</span><span class="s1">'s'</span><span class="p">:</span> <span class="s1">'peace'</span><span class="p">})</span>
+
+<span class="c1"># output</span>
+<span class="n">love</span> <span class="n">peace</span>
+</code></pre></div><h3>join连接</h3><div class="highlight"><pre><code class="language-python"><span></span><span class="c1"># code</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"+"</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">'L'</span><span class="p">,</span> <span class="s1">'G'</span><span class="p">,</span> <span class="s1">'007'</span><span class="p">]))</span>
+
+<span class="c1"># output</span>
+<span class="n">L</span><span class="o">+</span><span class="n">G</span><span class="o">+</span><span class="mi">007</span>
+</code></pre></div><h3>简易判断</h3><div class="highlight"><pre><code class="language-python"><span></span><span class="c1"># code-1</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'bingo'</span> <span class="k">if</span> <span class="mi">1</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="k">else</span> <span class="s1">'miss'</span><span class="p">)</span>
+
+<span class="c1"># output-1</span>
+<span class="n">miss</span>
+
+
+<span class="c1"># code-2</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">([(</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="s1">' bingo'</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">x</span> <span class="o">%</span> <span class="mi">2</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="s1">' miss'</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]))</span>
+
+<span class="c1"># output-2</span>
+<span class="mi">0</span> <span class="n">bingo</span>
+<span class="mi">1</span> <span class="n">miss</span>
+<span class="mi">2</span> <span class="n">bingo</span>
+<span class="mi">3</span> <span class="n">miss</span>
+<span class="mi">4</span> <span class="n">bingo</span>
+<span class="mi">5</span> <span class="n">miss</span>
+<span class="mi">6</span> <span class="n">bingo</span>
+<span class="mi">7</span> <span class="n">miss</span>
+<span class="mi">8</span> <span class="n">bingo</span>
+<span class="mi">9</span> <span class="n">miss</span>
+</code></pre></div><h3>条件过滤</h3><div class="highlight"><pre><code class="language-python"><span></span><span class="c1"># code</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="s2">"T"</span> <span class="ow">in</span> <span class="n">x</span><span class="p">,</span> <span class="p">[</span><span class="s2">"TIT"</span><span class="p">,</span> <span class="s2">"YoY"</span><span class="p">]))</span>
+
+<span class="c1"># output</span>
+<span class="p">[</span><span class="s1">'TIT'</span><span class="p">]</span>
+</code></pre></div><h3>排序技巧</h3><div class="highlight"><pre><code class="language-python"><span></span><span class="c1"># code-1</span>
+<span class="kn">import</span> <span class="nn">heapq</span>
+<span class="n">k</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">heapq</span><span class="o">.</span><span class="n">nsmallest</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">k</span><span class="p">),</span> <span class="n">k</span><span class="p">))</span>
+
+<span class="c1"># output-1</span>
+<span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]</span>
+
+<span class="c1"># note-1</span>
+<span class="n">从小到大排序</span>
+
+
+<span class="c1"># code-2</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">sorted</span><span class="p">([</span><span class="s1">'LG'</span><span class="p">,</span> <span class="s1">'cdn'</span><span class="p">,</span> <span class="s1">'dll'</span><span class="p">,</span> <span class="s1">'BBQ'</span><span class="p">,</span> <span class="s1">'afun'</span><span class="p">],</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">x</span><span class="p">)))</span>
+
+<span class="c1"># output-2</span>
+<span class="p">[</span><span class="s1">'LG'</span><span class="p">,</span> <span class="s1">'BBQ'</span><span class="p">,</span> <span class="s1">'cdn'</span><span class="p">,</span> <span class="s1">'dll'</span><span class="p">,</span> <span class="s1">'afun'</span><span class="p">]</span>
+
+<span class="c1"># note-2</span>
+<span class="n">先按长度</span><span class="err">、</span><span class="n">再按</span> <span class="n">ascii</span> <span class="n">值从小到大依次排序</span>
+
+
+<span class="c1"># code-3</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'apple'</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'orange'</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">'banana'</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">'tomato'</span><span class="p">:</span> <span class="mi">2</span><span class="p">}</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">OrderedDict</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])))</span>
+
+<span class="c1"># output-3</span>
+<span class="n">OrderedDict</span><span class="p">([(</span><span class="s1">'apple'</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="s1">'tomato'</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="s1">'orange'</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="s1">'banana'</span><span class="p">,</span> <span class="mi">4</span><span class="p">)])</span>
+
+<span class="c1"># note-3</span>
+<span class="n">无序字典变有序字典</span> <span class="p">(</span><span class="n">按</span> <span class="n">value</span> <span class="n">排序</span><span class="p">)</span>
+</code></pre></div><h3>字典合并</h3><div class="highlight"><pre><code class="language-python"><span></span><span class="c1"># code-1</span>
+<span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'a'</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+<span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">'b'</span><span class="p">:</span> <span class="mi">2</span><span class="p">})</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+
+<span class="c1"># output-1</span>
+<span class="p">{</span><span class="s1">'a'</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'b'</span><span class="p">:</span> <span class="mi">2</span><span class="p">}</span>
+
+
+<span class="c1"># code-2</span>
+<span class="n">d1</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'a'</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+<span class="n">d2</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'b'</span><span class="p">:</span> <span class="mi">2</span><span class="p">}</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="o">**</span><span class="n">d2</span><span class="p">))</span>
+
+<span class="c1"># output-2</span>
+<span class="p">{</span><span class="s1">'a'</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'b'</span><span class="p">:</span> <span class="mi">2</span><span class="p">}</span>
+</code></pre></div><h3>列表推导式</h3><div class="highlight"><pre><code class="language-python"><span></span><span class="c1"># code</span>
+<span class="nb">print</span><span class="p">([</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="s1">'LandGrey'</span> <span class="k">if</span> <span class="nb">ord</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">ord</span><span class="p">(</span><span class="s1">'d'</span><span class="p">)])</span>
+
+<span class="c1"># output</span>
+<span class="p">[</span><span class="s1">'n'</span><span class="p">,</span> <span class="s1">'r'</span><span class="p">,</span> <span class="s1">'e'</span><span class="p">,</span> <span class="s1">'y'</span><span class="p">]</span>
+</code></pre></div><h3>zip分配生成dict</h3><div class="highlight"><pre><code class="language-python"><span></span><span class="c1"># code</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="s1">'AABCD'</span><span class="p">,</span> <span class="n">xrange</span><span class="p">(</span><span class="mi">5</span><span class="p">))))</span>
+
+<span class="c1"># output</span>
+<span class="p">{</span><span class="s1">'A'</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'C'</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">'B'</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">'D'</span><span class="p">:</span> <span class="mi">4</span><span class="p">}</span>
+
+<span class="c1"># note</span>
+<span class="n">本质</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">list</span><span class="p">([(</span><span class="n">k1</span><span class="p">,</span> <span class="n">v1</span><span class="p">),</span> <span class="p">(</span><span class="n">k2</span><span class="p">,</span> <span class="n">v2</span><span class="p">)]),</span> <span class="o">...</span><span class="p">)</span>
+</code></pre></div><h3>switch-case写法</h3><div class="highlight"><pre><code class="language-python"><span></span><span class="c1"># code</span>
+<span class="k">def</span> <span class="nf">switch</span><span class="p">(</span><span class="n">case</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="mi">0</span><span class="p">:</span> <span class="s2">"&gt;"</span><span class="p">,</span>
+        <span class="mi">1</span><span class="p">:</span> <span class="s2">"&lt;"</span><span class="p">,</span>
+        <span class="mi">2</span><span class="p">:</span> <span class="s2">"="</span>
+    <span class="p">}</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">case</span><span class="p">,</span> <span class="s2">"?"</span><span class="p">)</span>
+
+
+<span class="nb">print</span><span class="p">(</span><span class="n">switch</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+
+<span class="c1"># output</span>
+<span class="o">&lt;</span>
+</code></pre></div><h3>Format自动解包</h3><div class="highlight"><pre><code class="language-python"><span></span><span class="c1"># code</span>
+<span class="n">t</span> <span class="o">=</span> <span class="p">[{</span><span class="s1">'protocol'</span><span class="p">:</span> <span class="s1">'https'</span><span class="p">},</span> <span class="s1">'landgrey.me'</span><span class="p">,</span> <span class="s1">'443'</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="si">{0[0][protocol]}</span><span class="s2">://</span><span class="si">{0[1]}</span><span class="s2">:</span><span class="si">{0[2]}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
+
+<span class="c1"># output</span>
+<span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">landgrey</span><span class="o">.</span><span class="n">me</span><span class="p">:</span><span class="mi">443</span>
+</code></pre></div><h3>输出类中无注释的函数列表</h3><p data-pid="KtitN-Yr">这个问题来自<a href="https://www.zhihu.com/question/438680458" class="internal" target="_blank">Python如何调用一个py文件并输出部分行内容？</a></p><p data-pid="q1HkJX4J">已知类的定义如下</p><div class="highlight"><pre><code class="language-python"><span></span><span class="k">class</span> <span class="nc">Foo</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initial_balance</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">balance</span> <span class="o">=</span> <span class="n">initial_balance</span>
+
+    <span class="k">def</span> <span class="nf">deposit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amount</span><span class="p">):</span>
+        <span class="sd">'''Deposit amount'''</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">balance</span> <span class="o">+=</span> <span class="n">amount</span>
+
+    <span class="k">def</span> <span class="nf">withdraw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amount</span><span class="p">):</span>
+        <span class="sd">'''Withdraw amount'''</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">balance</span> <span class="o">-=</span> <span class="n">amount</span>
+
+    <span class="k">def</span> <span class="nf">overdrawn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance</span> <span class="o">&lt;</span> <span class="mi">0</span>
+</code></pre></div><p data-pid="M4OCAh--">输出无注释的函数列表</p><div class="highlight"><pre><code class="language-python"><span></span><span class="nb">print</span><span class="p">([</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">for</span> <span class="n">func</span> <span class="ow">in</span> <span class="n">Foo</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="n">callable</span><span class="p">(</span><span class="n">func</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">func</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">])</span>
+<span class="c1"># ['__init__', 'overdrawn']</span>
+</code></pre></div><h2>代码片段</h2><h3>从右向左替换字符串</h3><div class="highlight"><pre><code class="language-python"><span></span><span class="c1"># code </span>
+<span class="k">def</span> <span class="nf">rreplace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">old</span><span class="p">,</span> <span class="n">new</span><span class="p">,</span> <span class="o">*</span><span class="nb">max</span><span class="p">):</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">max</span> <span class="ow">and</span> <span class="nb">str</span><span class="p">(</span><span class="nb">max</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="nb">max</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">new</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="n">old</span><span class="p">,</span> <span class="n">count</span><span class="p">))</span>
+
+<span class="nb">print</span> <span class="n">rreplace</span><span class="p">(</span><span class="s2">"lemon tree"</span><span class="p">,</span> <span class="s2">"e"</span><span class="p">,</span> <span class="s2">"3"</span><span class="p">)</span>
+<span class="nb">print</span> <span class="n">rreplace</span><span class="p">(</span><span class="s2">"lemon tree"</span><span class="p">,</span> <span class="s2">"e"</span><span class="p">,</span> <span class="s2">"3"</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># output</span>
+<span class="n">l3mon</span> <span class="n">tr33</span>
+<span class="n">lemon</span> <span class="n">tre3</span>
+</code></pre></div><h3>命令行调用程序中的函数</h3><div class="highlight"><pre><code class="language-python"><span></span><span class="c1"># test_arg.py</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="k">def</span> <span class="nf">praise</span><span class="p">(</span><span class="n">sb</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{sb}</span><span class="s2"> is awesome!"</span><span class="p">)</span>
+
+<span class="n">this_module</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="vm">__name__</span><span class="p">]</span>
+<span class="nb">getattr</span><span class="p">(</span><span class="n">this_module</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">])(</span><span class="o">*</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span>
+</code></pre></div><p data-pid="WPisMuDp"><code>sys.modules[__name__]</code>获取当前程序的对象，<code>get_attr()</code>获取程序中的方法或变量，所以<code>sys.argv[1]</code>存储要调用的函数，而后面加括号是调用这个函数，<code>sys.argv[2:]</code>是这个函数的参数</p><div class="highlight"><pre><code class="language-text"><span></span>python test_arg.py praise python
+# python is awesome!
+</code></pre></div><h3>神奇的列表展平方式</h3><div class="highlight"><pre><code class="language-python"><span></span><span class="n">x</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="p">[</span><span class="mi">6</span><span class="p">]]</span>
+<span class="nb">sum</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">[])</span>
+<span class="c1"># [1, 2, 3, 4, 5, 6]</span>
+</code></pre></div><p data-pid="vq3n6gw0">但是注意这里只允许列表是标准的单层嵌套，也就是说每个元素都必须是列表，该方法只能展开一层</p><div class="highlight"><pre><code class="language-python"><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]],</span> <span class="p">[[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">]]])</span>
+<span class="n">x</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+<span class="c1"># array([1, 2, 3, 4, 4, 5, 6, 7])</span>
+</code></pre></div><p data-pid="7kHZ1qLB">注意这里的numpy展平方式更加局限，它要求各元素维度相同，但它可以全部展开，而以上的sum方法只能展开一层</p>

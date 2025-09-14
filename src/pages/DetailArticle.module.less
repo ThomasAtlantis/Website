@@ -1,0 +1,248 @@
+.detailContainer {
+  width: 100%;
+  padding: 20px 0 20px 0;
+  min-height: 100vh;
+  margin-top: 40px;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: 18px;
+  color: #666;
+}
+
+.notFound {
+  text-align: center;
+  padding: 60px 20px;
+  
+  h2 {
+    color: #333;
+    margin-bottom: 30px;
+    font-size: 24px;
+  }
+}
+
+.detailHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.backButton {
+  color: black;
+  font-family: "HarmonyOS Sans SC";
+  background-color: transparent;
+  border: 2px solid black;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background: black;
+    color: white;
+    border: 2px solid black;
+  }
+}
+
+.poemMeta {
+  display: flex;
+  gap: 15px;
+  font-size: 14px;
+  color: #666;
+}
+
+.poemDate {
+}
+.author {
+}
+
+.poemCategory {
+  background: #f8f9fa;
+  color: #495057;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.poemArticle {
+  background: #fff;
+  overflow: hidden;
+  width: 70%;
+}
+
+.poemHeader {
+  padding: 20px 0 20px 30px;
+  text-align: left;
+}
+
+.poemTitle {
+  font-size: 28px;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.poemCover {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+
+  &:hover img {
+    transform: scale(1.05);
+  }
+}
+
+.poemContent {
+  padding: 0;
+}
+
+.poemLayout {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.firstColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.poemColumns {
+  grid-column: 2 / -1;
+  column-count: 2;
+  column-gap: 30px;
+}
+
+.poemParagraph {
+  break-inside: avoid;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.paragraphNumber {
+  font-weight: bold;
+  color: #1177b0;
+  font-size: 14px;
+  min-width: 20px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.poemText {
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-size: 16px;
+  line-height: 1.8;
+  color: #333;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin: 0;
+  text-align: left;
+}
+
+.commentsSection {
+  margin-top: 40px;
+  padding-top: 0px;
+  border-top: 1px solid #eee;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.commentText {
+  font-size: 12px;
+  color: #666;
+  line-height: 1.5;
+  margin: 0 0 15px 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+  .detailContainer {
+    padding: 15px;
+  }
+
+  .detailHeader {
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
+  }
+
+  .poemMeta {
+    align-self: stretch;
+    justify-content: space-between;
+  }
+
+  .poemTitle {
+    font-size: 24px;
+  }
+
+  .poemHeader {
+    padding: 0;
+  }
+
+  .poemCover {
+    height: 200px;
+  }
+
+  .poemContent {
+    padding: 20px;
+  }
+
+  .poemLayout {
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .poemColumns {
+    grid-column: 2 / -1;
+    column-count: 1;
+    column-gap: 20px;
+  }
+
+  .poemText {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .poemTitle {
+    font-size: 20px;
+  }
+
+  .poemLayout {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .poemColumns {
+    grid-column: 1;
+    column-count: 1;
+    column-gap: 15px;
+  }
+
+  .poemText {
+    font-size: 13px;
+  }
+}

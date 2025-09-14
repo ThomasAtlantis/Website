@@ -1,0 +1,25 @@
+<p data-pid="0efnHQIe">其实我认为<b>GitHub就支持rST文件的预览</b>，你可以尝试把文件传上去看看效果。这是我在研究Python的源码时发现的：<a href="https://link.zhihu.com/?target=https%3A//github.com/python/cpython/blob/7c9487ded4/Doc/c-api/typeobj.rst" class=" wrap external" target="_blank" rel="nofollow noreferrer">python/cpython</a>，这个应该是从源码自动提取生成的rST文件。</p><p data-pid="Ab5Rwv2P"><b>另外一种方法 </b>这里是一个基于Flask实现的rST在线编辑器，可以实现实时预览渲染的结果：<a href="https://link.zhihu.com/?target=https%3A//github.com/anru/rsted" class=" wrap external" target="_blank" rel="nofollow noreferrer">rsted</a>。里面提到的在线网站 <a href="https://link.zhihu.com/?target=http%3A//rst.ninjs.org/" class=" external" target="_blank" rel="nofollow noreferrer"><span class="invisible">http://</span><span class="visible">rst.ninjs.org/</span><span class="invisible"></span></a> 已经关停，但是可以下载下来在本地跑：</p><div class="highlight"><pre><code class="language-bash"><span></span>git@github.com:anru/rsted.git
+pip install -r pip-requirements.txt
+</code></pre></div><p data-pid="5F7JuC5C">由于项目年久失修，这个项目应该是使用Python2.7编写的，如果你要使用Python3.x，需要修改一些地方：</p><ol><li data-pid="j66oZNFa">注释掉application.py中的reload，这个是用来控制utf-8编码的，Python3.x默认就是这个编码</li></ol><div class="highlight"><pre><code class="language-python"><span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># all the imports</span>
+
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span>
+<span class="c1"># reload(sys)</span>
+<span class="c1"># sys.setdefaultencoding('utf-8')</span>
+<span class="o">...</span>
+</code></pre></div><p data-pid="dbs6H-Pr">2. 修改rsted/pdf.py中对StringIO的导入，在Python3.x中它被包含在io中了</p><div class="highlight"><pre><code class="language-python"><span></span><span class="kn">from</span> <span class="nn">rst2pdf.createpdf</span> <span class="kn">import</span> <span class="n">RstToPdf</span>
+<span class="kn">import</span> <span class="nn">codecs</span>
+<span class="n">utf8codec</span> <span class="o">=</span> <span class="n">codecs</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="s1">'utf-8'</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">current_app</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">cStringIO</span> <span class="kn">import</span> <span class="n">StringIO</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">StringIO</span> <span class="c1"># 修改这里</span>
+<span class="o">...</span>
+</code></pre></div><p data-pid="C6RSuSST">3. 修改setting.py中的字典关键字判断语句，has_key已经被淘汰了</p><div class="highlight"><pre><code class="language-python"><span></span><span class="kn">import</span> <span class="nn">os</span>
+
+<span class="c1"># configuration</span>
+<span class="n">DEBUG</span> <span class="o">=</span> <span class="ow">not</span> <span class="s1">'RSTED_PROD'</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span>
+</code></pre></div><p data-pid="NbvR3hzo">然后运行<code>python ./application.py</code>就可以通过<code>localhost:5000</code>访问了。如果你有服务器，也可以把这个挂在服务器上造福人类！运行效果如下：</p><figure data-size="normal"><noscript><img src="https://picx.zhimg.com/50/v2-cd90f1337fa073b8cc52e5af45f746d8_720w.jpg?source=c8b7c179" data-caption="" data-size="normal" data-rawwidth="1919" data-rawheight="940" data-original-token="v2-c7de850e07c8296279c185aa51bdd62e" data-default-watermark-src="https://picx.zhimg.com/50/v2-c9d72f6087fc7e685417d706bc9c29b3_720w.jpg?source=c8b7c179" class="origin_image zh-lightbox-thumb" width="1919" data-original="https://picx.zhimg.com/v2-cd90f1337fa073b8cc52e5af45f746d8_r.jpg?source=c8b7c179"></noscript><img src="data:image/svg+xml;utf8,&lt;svg%20xmlns='http://www.w3.org/2000/svg'%20width='1919'%20height='940'&gt;&lt;/svg&gt;" data-caption="" data-size="normal" data-rawwidth="1919" data-rawheight="940" data-original-token="v2-c7de850e07c8296279c185aa51bdd62e" data-default-watermark-src="https://picx.zhimg.com/50/v2-c9d72f6087fc7e685417d706bc9c29b3_720w.jpg?source=c8b7c179" class="origin_image zh-lightbox-thumb lazy" width="1919" data-original="https://picx.zhimg.com/v2-cd90f1337fa073b8cc52e5af45f746d8_r.jpg?source=c8b7c179" data-actualsrc="https://picx.zhimg.com/50/v2-cd90f1337fa073b8cc52e5af45f746d8_720w.jpg?source=c8b7c179"></figure><p data-pid="ejJ0nRM5">另外，我不知道rST的语法有没有更新过，最上面我提到的Python源码中c-api的rST文档在这里渲染全是报错。</p>

@@ -1,0 +1,17 @@
+<p data-pid="GEGEV0NK"><a class="member_mention" href="https://www.zhihu.com/people/3fdd41888d8d87e80ddbc103a89cc37e" data-hash="3fdd41888d8d87e80ddbc103a89cc37e" data-hovercard="p$b$3fdd41888d8d87e80ddbc103a89cc37e">@老虎说</a> 这位答主的思路是正确的，有些答主怎么就不假思索地答非所问呢？这里提供一种更简单好用的方法，<b>只需要稍微改变一下注释的方式，就可以用一句话解决</b>：</p><div class="highlight"><pre><code class="language-python3"><span></span><span class="k">class</span> <span class="nc">Foo</span><span class="p">:</span>
+            
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initial_balance</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">balance</span> <span class="o">=</span> <span class="n">initial_balance</span>
+
+    <span class="k">def</span> <span class="nf">deposit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amount</span><span class="p">):</span>
+        <span class="sd">'''Deposit amount'''</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">balance</span> <span class="o">+=</span> <span class="n">amount</span>
+
+    <span class="k">def</span> <span class="nf">withdraw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amount</span><span class="p">):</span>
+        <span class="sd">'''Withdraw amount'''</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">balance</span> <span class="o">-=</span> <span class="n">amount</span>
+
+    <span class="k">def</span> <span class="nf">overdrawn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance</span> <span class="o">&lt;</span> <span class="mi">0</span>
+</code></pre></div><p data-pid="VHREUt3p">题主给的描述中代码不完整，我补充了一下，将函数上方的注释改成了函数文档。我本科的时候给课设的代码写报告的时候，也需要得到所有函数。其实这样写更规范而且无需正则匹配，只需要一句话：</p><div class="highlight"><pre><code class="language-text"><span></span>print([func.__name__ for func in Foo.__dict__.values() if callable(func) and not func.__doc__])
+</code></pre></div><p></p>
