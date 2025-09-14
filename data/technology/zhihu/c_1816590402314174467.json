@@ -1,0 +1,9 @@
+{
+  "title": "自动化营销机器",
+  "description": "关于使用爬虫、AIGC、传播学理论等工具进行自动化营销的尝试",
+  "type": "category",
+  "items_count": 0,
+  "children": {},
+  "target_dir": "./tmp/zhihu",
+  "updated_time": 1725888902
+}

@@ -1,0 +1,58 @@
+<h2>Python3.9安装uWSGI失败</h2><p data-pid="x7lQfPsB">前几天突然收到阿里云的邮件，我的轻量应用服务器马上到期，一查发现，学生优惠不复存在，续费价格翻了10倍，只好暂时新购一台腾讯云的服务器作为权衡之计，然后慢慢思考长期白嫖的办法。由于我的服务器上一直运行着网站，所以不得不花很多精力去做迁移。</p><p data-pid="MS3HsUm4">之前服务器上的网站使用的是Django做后端，用的是Nginx和uWSGI做web server。迁移环境的时候，为了紧跟时代潮流我作了一下死，打算把环境从Python3.7.3迁移到Python3.9.7以享受更多的语法，然后就跳进了一个大坑。在安装uWSGI时出现以下编译错误（注意我两台服务器的<b>操作系统都是CentOS7</b>，别的系统会不会出这个问题我不敢保证）：</p><div class="highlight"><pre><code class="language-bash"><span></span>pip install uwsgi
+------------------------------------------------------------------------------------------------------------
+Command errored out with <span class="nb">exit</span> status <span class="m">1</span>:
+/root/softwares/anaconda3/lib/python3.9/config-3.9-x86_64-linux-gnu/libpython3.9.a no such file or directory
+</code></pre></div><p data-pid="vaY0z2ew">网上所有的方法都解决不了，包括：使用conda安装uwsgi、安装python3-devel、从uwsgi源码手动编译安装。剩下唯一可行的方案就是降低Python版本，但我偏不想妥协，因为我的Anaconda的base环境是3.9，降版本无非是新建一个虚拟环境，那样每次还需要activate。本文记录的内容是从bash_history和浏览器搜索记录中勉强恢复的，可能不会一字不差，因为当时在忙第二天的组会PPT，所以没有及时记录。</p><h2>和BUG死磕到底的解决方案</h2><p data-pid="-Tf2Cdvw">根据以上报错，我们发现问题很明确，就是找不到libpython3.9.a文件。我们知道<code>.a</code>文件在Linux中是静态库文件，另一个我们熟知的<code>.so</code>是动态库文件。那之前服务器上Python3.7就不缺这个文件吗？首先进入到Python3.7的环境下，然后使用which查看Python的位置：</p><div class="highlight"><pre><code class="language-bash"><span></span>conda activate python37 <span class="o">&amp;&amp;</span> which python
+----------------------------------------
+/root/anaconda2/envs/python37/bin/python
+</code></pre></div><p data-pid="CB1C5c85">那么参考上面的报错，分析存储.a文件的路径应为：</p><div class="highlight"><pre><code class="language-bash"><span></span>ls /root/anaconda2/envs/python37/lib/python3.7/config-3.7m-x86_64-linux-gnu/
+----------------------------------------------------------------------------
+config.c     libpython3.7m.a  __pycache__       Setup
+config.c.in  Makefile         python-config.py  Setup.local
+install-sh   makesetup        python.o
+</code></pre></div><p data-pid="qO7EbOyG">结果发现还真有这个文件，试了很多版本之后发现，只有3.9没这个文件。网上查不到过多的资料，但偶然发现一个神奇的BUG文档：<a href="http://link.zhihu.com/?target=https%3A//bugs.python.org/issue43103" class=" external" target="_blank" rel="nofollow noreferrer"><span class="invisible">https://</span><span class="visible">bugs.python.org/issue43</span><span class="invisible">103</span><span class="ellipsis"></span></a>。里面赫然写着：</p><blockquote data-pid="tAFT6lnQ">Most users don't build a static Python executable, so I propose to no longer build "static Python" by default and add --with-static-python option to the configure script.</blockquote><p data-pid="ijuUm8Cq">大多数用户不会使用到静态库，所以你建议在3.10中不默认构建这个？那Python3.9是不是也是你建议的呢？于是我想到，只要我们重新编译Python就好了，只要不使用--without-static-libpython这个参数，就一定能得到.a文件。</p><h3>从源码重新编译Python3.9.7</h3><p data-pid="H4WmMFn7">首先下载并解压Python3.9.7的源码：</p><div class="highlight"><pre><code class="language-bash"><span></span>wget -t <span class="m">100</span> -c https://www.python.org/ftp/python/3.9.7/Python-3.9.7.tgz
+tar -zxf Python-3.9.7.tgz 
+</code></pre></div><p data-pid="SJNc9kaY">然后确保工具库都已经安装：</p><div class="highlight"><pre><code class="language-bash"><span></span>yum -y install gcc wget gcc-c++ automake autoconf libtool libxml2-devel libxslt-devel perl-devel zlib zlib-devel libffi-devel openssl openssl-devel
+</code></pre></div><p data-pid="vgsuCWD5">然后进入到源码文件夹进行编译和安装：</p><div class="highlight"><pre><code class="language-bash"><span></span><span class="nb">cd</span> Python-3.9.7/
+./configure --prefix<span class="o">=</span>/tmp/Python
+make -j4
+make install
+</code></pre></div><p data-pid="KkM9q4mC">注意这里我们只是为了得到Python的静态库文件，为了防止Python版本直接的串扰，我们将目标目录设置到/tmp中，使用-j4是因为我的CPU是两核四线程。编译之后会发现我们果然得到了.a文件，将其拷贝到报错的位置上：</p><div class="highlight"><pre><code class="language-bash"><span></span>cp /tmp/Python/lib/libpython3.9.a ~/softwares/anaconda3/lib/python3.9/config-3.9-x86_64-linux-gnu/
+</code></pre></div><p data-pid="rtjntuMP">然后我这里使用的是uwsgi的源码安装，使用pip也是一样的，但是我预料到编译会有更多的问题，而pip每次都会下载新文件，比较浪费流量。</p><div class="highlight"><pre><code class="language-bash"><span></span>wget http://projects.unbit.it/downloads/uwsgi-latest.tar.gz
+tar -zxf uwsgi-latest.tar.gz
+<span class="nb">cd</span> uwsgi-2.0.20/
+python uwsgiconfig.py --build
+</code></pre></div><p data-pid="dG0doc-M">然后就会得到更多的报错：</p><div class="highlight"><pre><code class="language-bash"><span></span>libcrypt.so: undefined reference to <span class="sb">`</span>NSSLOWHASH_NewContext@NSSRAWHASH_3.12.3 ...
+</code></pre></div><h3>解决@NSSRAWHASH_3.12.3未定义</h3><p data-pid="5ASvGc9O">这里也查不到解决方案！但是我发现网上都提示要安装openssl-devel，但问题是我已经安装了。所以猜想是环境变量不太对，果然查看上面这个报错的详细信息会发现，uwsgi在编译的时候使用的是Anaconda的链接器：</p><div class="highlight"><pre><code class="language-text"><span></span>/root/softwares/anaconda3/compiler_compat/ld
+</code></pre></div><p data-pid="W0e42k9y">这可能是因为我系统上默认的Python是Anaconda下base环境的Python。系统默认的ld其实在这里：</p><div class="highlight"><pre><code class="language-bash"><span></span>which ld<span class="p">|</span>xargs ls -l
+---------------------------------------------------------------------------
+lrwxrwxrwx <span class="m">1</span> root root <span class="m">20</span> <span class="m">11</span>月 <span class="m">23</span> <span class="m">17</span>:52 /usr/bin/ld -&gt; /etc/alternatives/ld
+</code></pre></div><p data-pid="5CeW3pQm">那么我们只需要强制它使用系统ld就好了，我比较暴力地让Anaconda找不到它自己的ld：</p><div class="highlight"><pre><code class="language-bash"><span></span>mv /root/softwares/anaconda3/compiler_compat/ld /root/softwares/anaconda3/compiler_compat/ld_sav
+</code></pre></div><p data-pid="myYQ8XCh">然后重新build，发现刚刚的错误消失了，出现了另一个错误：</p><div class="highlight"><pre><code class="language-text"><span></span>/usr/lib64/libstdc.so.6: undefined reference to ‘__cxa_throw_bad_array_new_length@CXXABI_1.3.8’
+</code></pre></div><h3>升级libstdc.so.6</h3><p data-pid="jcaFTyDa">这个问题就很常见了，是因为系统的libstdc.so.6的版本不够高。</p><div class="highlight"><pre><code class="language-bash"><span></span>strings /usr/lib64/libstdc++.so.6<span class="p">|</span>grep CXXABI
+---------------------------------------------
+CXXABI_1.3
+CXXABI_1.3.1
+CXXABI_1.3.2
+CXXABI_1.3.3
+CXXABI_1.3.4
+CXXABI_1.3.5
+CXXABI_1.3.6
+CXXABI_1.3.7
+CXXABI_TM_1
+</code></pre></div><p data-pid="uz6GM60v">可以发现这个文件是链接到6.0.19版本的库文件的：</p><div class="highlight"><pre><code class="language-bash"><span></span>ls -l /usr/lib64/libstdc++.so.6
+---------------------------------------------------------------------------------------------------
+lrwxrwxrwx <span class="m">1</span> root root <span class="m">30</span> <span class="m">2</span>月  <span class="m">21</span> <span class="m">21</span>:12 /usr/lib64/libstdc++.so.6 -&gt; /usr/lib64/libstdc++.so.6.0.19
+</code></pre></div><p data-pid="Elx4lCjG">我们从这里下载高版本的库文件：<a href="http://link.zhihu.com/?target=https%3A//wwa.lanzoui.com/i8lnene" class=" wrap external" target="_blank" rel="nofollow noreferrer">libstdc++.so.6.0.26.zip</a>，下载完解压，将libstdc++.so.6.0.26移动到/usr/lib64下，然后删除原来的文件，重新进行软链接：</p><div class="highlight"><pre><code class="language-bash"><span></span>rm /usr/lib64/libstdc++.so.6
+ln -s /usr/lib64/libstdc++.so.6.0.26 /usr/lib64/libstdc++.so.6
+</code></pre></div><p data-pid="uwW6Y_cw">然后重新build，报了另外一个错误：</p><div class="highlight"><pre><code class="language-text"><span></span>uwsgi: error while loading shared libraries: libicui18n.so.58
+</code></pre></div><h3>修复libicuuc.so.58环境</h3><p data-pid="_J2bi8iq">通过locate命令，我们查找到系统中这个库的位置：</p><div class="highlight"><pre><code class="language-bash"><span></span>locate libicui18n.so.58
+-------------------------------------------------------------------------
+/root/softwares/anaconda3/lib/libicui18n.so.58
+/root/softwares/anaconda3/lib/libicui18n.so.58.2
+/root/softwares/anaconda3/pkgs/icu-58.2-he6710b0_3/lib/libicui18n.so.58
+/root/softwares/anaconda3/pkgs/icu-58.2-he6710b0_3/lib/libicui18n.so.58.2
+</code></pre></div><p data-pid="YctUukGQ">我们只需要把以上路径软链接到系统的lib目录下即可：</p><div class="highlight"><pre><code class="language-bash"><span></span>ln -s /root/softwares/anaconda3/lib/libicui18n.so.58 /usr/lib64/libicui18n.so.58
+ln -s /root/softwares/anaconda3/lib/libicui18n.so.58.2 /usr/lib64/libicui18n.so.58.2
+</code></pre></div><p data-pid="waunAQOx">然后再次build，发现大功告成！！！最后不要忘记将Anaconda的ld移动回来：</p><div class="highlight"><pre><code class="language-bash"><span></span>mv /root/softwares/anaconda3/compiler_compat/ld_sav /root/softwares/anaconda3/compiler_compat/ld
+</code></pre></div><p></p>

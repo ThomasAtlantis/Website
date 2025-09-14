@@ -1,0 +1,97 @@
+<p data-pid="vYwAAJsk">本系列文章长期维护更新，希望Python编程水平逐日精进</p><ul><li data-pid="D-1Iuj1z"><a href="https://zhuanlan.zhihu.com/p/344907422" class="internal" target="_blank">Python高级编程 | 知识碎片</a></li><li data-pid="hX8EaNn3"><a href="https://zhuanlan.zhihu.com/p/345058566" class="internal" target="_blank">Python高级编程 | 奇技淫巧</a></li><li data-pid="SBP0IalI"><a href="https://zhuanlan.zhihu.com/p/345187339" class="internal" target="_blank">Python高级编程 | 走火入魔</a></li></ul><h2>#1 Numpy中的省略号索引 - Ellipsis常量</h2><p data-pid="drol0b5Y">在TensorFlow官网给出的<a href="http://link.zhihu.com/?target=https%3A//www.tensorflow.org/tutorials/quickstart/advanced" class=" wrap external" target="_blank" rel="nofollow noreferrer">针对专业人员的 TensorFlow 2.0 入门</a>教程中有下面这个经典语句</p><div class="highlight"><pre><code class="language-python"><span></span><span class="c1"># Add a channels dimension</span>
+<span class="n">x_train</span> <span class="o">=</span> <span class="n">x_train</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+</code></pre></div><p data-pid="J0k_SuQw">这句话给x_train变量添加了一个新的维度，相比np.expand_dims更加的简洁直观，那么这个省略号是个什么意思呢？实际上它学名叫做Ellipsis对象，我们找不到资料的时候更多是因为关键词的打开方式不对。这篇<a href="http://link.zhihu.com/?target=https%3A//farer.org/2017/11/29/python-ellipsis-object/" class=" wrap external" target="_blank" rel="nofollow noreferrer">Python的Ellipsis对象</a>已经讲解的十分细致了，在这里我fork一下，再夹带一些私货：</p><p data-pid="El0H8YJl">Python3中可以使用<code>...</code>，Python2中只能用<code>Ellipsis</code></p><div class="highlight"><pre><code class="language-python"><span></span><span class="nb">type</span><span class="p">(</span><span class="bp">Ellipsis</span><span class="p">)</span>  <span class="c1"># &lt;type 'ellipsis'&gt; Python2.x</span>
+<span class="nb">type</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>  <span class="c1"># &lt;class 'ellipsis'&gt; Python3.x</span>
+</code></pre></div><p data-pid="EGg9buzM">转为布尔值时为真，是一个单例，可以作为右值，无法作为左值。事实上这个省略号就是一个具有特殊值的内置常量，参考官方文档</p><div class="highlight"><pre><code class="language-text"><span></span>... = 1   # SyntaxError: can't assign to Ellipsis
+abc = ... # 不想初始化abc时可以将其赋值为Ellipsis
+</code></pre></div><p data-pid="3oAMWiO4"><b>用武之地</b></p><ul><li data-pid="f4qi9sQp">Numpy索引中选取不确定数量的连续维度</li></ul><div class="highlight"><pre><code class="language-python"><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">24</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="sd">'''</span>
+<span class="sd">array([[[ 0,  1,  2,  3],</span>
+<span class="sd">        [ 4,  5,  6,  7],</span>
+<span class="sd">        [ 8,  9, 10, 11]],</span>
+
+<span class="sd">       [[12, 13, 14, 15],</span>
+<span class="sd">        [16, 17, 18, 19],</span>
+<span class="sd">        [20, 21, 22, 23]]])</span>
+<span class="sd">'''</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">x</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="sd">'''</span>
+<span class="sd">array([[ 0,  4,  8],</span>
+<span class="sd">       [12, 16, 20]])</span>
+<span class="sd">等价于x[:, :, 0]</span>
+<span class="sd">'''</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+<span class="sd">'''</span>
+<span class="sd">array([[ 0,  1,  2,  3],</span>
+<span class="sd">       [ 4,  5,  6,  7],</span>
+<span class="sd">       [ 8,  9, 10, 11]])</span>
+<span class="sd">等价于x[0, :, :]</span>
+<span class="sd">'''</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="sd">'''</span>
+<span class="sd">array([0, 4, 8])</span>
+<span class="sd">等价于x[0, :, 0]</span>
+<span class="sd">'''</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">x</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+<span class="sd">'''</span>
+<span class="sd">array([[ 0,  1,  2,  3],</span>
+<span class="sd">       [12, 13, 14, 15]])</span>
+<span class="sd">等价于x[:, 0, :]</span>
+<span class="sd">'''</span>
+</code></pre></div><p data-pid="L2cCAWrx">总结来说，Ellipsis索引就相当于多个连续的冒号索引，其数量在其余索引的约束下自动推导。但是要注意一个索引里面只能出现一次省略号，否则将会得到错误</p><div class="highlight"><pre><code class="language-python"><span></span><span class="ne">IndexError</span><span class="p">:</span> <span class="n">an</span> <span class="n">index</span> <span class="n">can</span> <span class="n">only</span> <span class="n">have</span> <span class="n">a</span> <span class="n">single</span> <span class="n">ellipsis</span> <span class="p">(</span><span class="s1">'...'</span><span class="p">)</span>
+</code></pre></div><ul><li data-pid="d5Cdmj4b">省略代码，和pass同效</li></ul><div class="highlight"><pre><code class="language-python"><span></span><span class="k">def</span> <span class="nf">foo</span><span class="p">():</span> <span class="o">...</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span> <span class="o">...</span>
+</code></pre></div><p data-pid="Fsjwz804">事实上任何常量都可以独占一行（所以才有了doc字符串这样的语法），那么任何常量也都可以起到pass的效果，这并不奇怪，只不过省略号更好表意。那么你也可以这样写。</p><div class="highlight"><pre><code class="language-python"><span></span><span class="k">def</span> <span class="nf">a</span><span class="p">():</span> <span class="bp">NotImplemented</span>
+</code></pre></div><ul><li data-pid="ozW2V8Fx">循环结构， 复合对象包含指向自身的引用</li></ul><div class="highlight"><pre><code class="language-python"><span></span><span class="n">L</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span>
+<span class="n">L</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">L</span><span class="p">)</span>
+<span class="c1"># [1,2,3,[…]]</span>
+</code></pre></div><ul><li data-pid="6s6REPf_">在类型提示中缺省未知类型或未知值</li></ul><div class="highlight"><pre><code class="language-text"><span></span># 不确定返回的函数参数有几个，是哪些
+from typing import Callable
+def foo() -&gt; Callable[..., int]:
+    return lambda x: 1
+
+# 不确定序列中其他元素的个数和类型
+from typing import  Tuple
+def foo() -&gt; Tuple[int, ...]:
+    return (1,2,3)
+
+# 不确定初始值或默认值，这就叫画蛇添足
+def foo(param: list = ...):
+    pass
+</code></pre></div><p data-pid="BqB8sxsW">上面文章中作者给出了重载__getitem__函数实现等差数列的例子，我再给出一个返回shuffle结果的例子，虽然同样没啥用：</p><div class="highlight"><pre><code class="language-python"><span></span><span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">shuffle</span>
+
+<span class="k">class</span> <span class="nc">List</span><span class="p">(</span><span class="nb">list</span><span class="p">):</span>
+    
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iterable</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">iterable</span><span class="p">)</span>
+        
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">is</span> <span class="o">...</span><span class="p">:</span>
+            <span class="n">to_return</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_</span><span class="p">[:]</span>
+            <span class="n">shuffle</span><span class="p">(</span><span class="n">to_return</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">to_return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+</code></pre></div><p data-pid="8R7RsA8W">使用方法如下，可以得到一个shuffle后的列表，并保持原列表内容不变</p><div class="highlight"><pre><code class="language-python"><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">List</span><span class="p">(</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">x</span><span class="p">[</span><span class="o">...</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">9</span><span class="p">]</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">x</span>
+<span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">]</span>
+</code></pre></div><h2>#2 Numpy中新增的点乘运算符：@</h2><p data-pid="QhzFFCur">在Python3.5以后，@除了作为装饰器语句的开始，还被Numpy重载为点乘操作符，既可以用来做矩阵乘法，也可以用来做向量乘法，A@B与A.dot(B)完全等价</p><div class="highlight"><pre><code class="language-python"><span></span><span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">X</span><span class="nd">@Y</span>
+<span class="n">array</span><span class="p">([[</span> <span class="mi">60</span><span class="p">,</span>  <span class="mi">70</span><span class="p">],</span>
+       <span class="p">[</span><span class="mi">160</span><span class="p">,</span> <span class="mi">195</span><span class="p">]])</span>
+<span class="c1"># 等价于 X.dot(Y)</span>
+<span class="c1"># 等价于 np.dot(X, Y)</span>
+</code></pre></div><p></p>

@@ -1,0 +1,87 @@
+{
+  "title": "Python高级编程",
+  "description": "记录一些基础教程没有覆盖到的知识碎片或进阶技术",
+  "type": "category",
+  "items_count": 11,
+  "children": {
+    "438166613_1948797862": {
+      "title": "Python如何将正则匹配到的多个位置替换成为不同内容？",
+      "href": "https://www.zhihu.com/question/438166613/answer/1948797862",
+      "type": "answer",
+      "updated_time": 1624087303,
+      "created_time": 1624087303
+    },
+    "376252502": {
+      "title": "Python高级编程 | 函数式编程读书笔记",
+      "href": "https://zhuanlan.zhihu.com/p/376252502",
+      "type": "article",
+      "updated_time": 1622273071,
+      "created_time": 1622272454
+    },
+    "345554379": {
+      "title": "Python为列表添加一个foreach方法",
+      "href": "https://zhuanlan.zhihu.com/p/345554379",
+      "type": "article",
+      "updated_time": 1611133318,
+      "created_time": 1611133000
+    },
+    "345547458": {
+      "title": "Python修改内置类型的属性和方法",
+      "href": "https://zhuanlan.zhihu.com/p/345547458",
+      "type": "article",
+      "updated_time": 1658641083,
+      "created_time": 1611066656
+    },
+    "345187339": {
+      "title": "Python高级编程 | 走火入魔",
+      "href": "https://zhuanlan.zhihu.com/p/345187339",
+      "type": "article",
+      "updated_time": 1611146299,
+      "created_time": 1611146299
+    },
+    "345058566": {
+      "title": "Python高级编程 | 奇技淫巧",
+      "href": "https://zhuanlan.zhihu.com/p/345058566",
+      "type": "article",
+      "updated_time": 1611146378,
+      "created_time": 1610940576
+    },
+    "344907422": {
+      "title": "Python高级编程 | 知识碎片",
+      "href": "https://zhuanlan.zhihu.com/p/344907422",
+      "type": "article",
+      "updated_time": 1628232980,
+      "created_time": 1610868384
+    },
+    "440338927_1688745699": {
+      "title": "python爬虫如何处理.js链接？",
+      "href": "https://www.zhihu.com/question/440338927/answer/1688745699",
+      "type": "answer",
+      "updated_time": 1611155584,
+      "created_time": 1611155584
+    },
+    "440204365_1686909387": {
+      "title": "Python如何修改内置类型？",
+      "href": "https://www.zhihu.com/question/440204365/answer/1686909387",
+      "type": "answer",
+      "updated_time": 1611069103,
+      "created_time": 1611069103
+    },
+    "438686773_1679071745": {
+      "title": "程序员的你，有哪些炫技的代码写法？",
+      "href": "https://www.zhihu.com/question/438686773/answer/1679071745",
+      "type": "answer",
+      "updated_time": 1611159100,
+      "created_time": 1610684154
+    },
+    "438680458_1679033666": {
+      "title": "Python如何调用一个py文件并输出部分行内容？",
+      "href": "https://www.zhihu.com/question/438680458/answer/1679033666",
+      "type": "answer",
+      "updated_time": 1610682771,
+      "created_time": 1610682771
+    }
+  },
+  "target_dir": "./tmp/zhihu",
+  "updated_time": 1756865290
+}

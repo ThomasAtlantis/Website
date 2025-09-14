@@ -1,0 +1,1 @@
+const t="自动化营销机器",c="关于使用爬虫、AIGC、传播学理论等工具进行自动化营销的尝试",e="category",s=0,o={},n="./tmp/zhihu",i=1725888902,d={title:t,description:c,type:e,items_count:0,children:o,target_dir:n,updated_time:1725888902};export{o as children,d as default,c as description,s as items_count,n as target_dir,t as title,e as type,i as updated_time};

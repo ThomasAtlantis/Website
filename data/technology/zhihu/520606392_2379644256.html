@@ -1,0 +1,47 @@
+<p data-pid="nZiNGEcV">这是个典型的<b>倒排索引</b>问题，相关概念可以参考 <a href="https://zhuanlan.zhihu.com/p/28320841" class="internal" target="_blank">陈运文：搜索引擎之倒排索引解读</a></p><div class="highlight"><pre><code class="language-python"><span></span><span class="n">d</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"植物"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"榕树"</span><span class="p">,</span> <span class="s2">"杨树"</span><span class="p">,</span> <span class="s2">"橡树"</span><span class="p">],</span>
+    <span class="s2">"动物"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"兔子"</span><span class="p">,</span> <span class="s2">"老虎"</span><span class="p">,</span> <span class="s2">"大象"</span><span class="p">]</span>
+<span class="p">}</span>
+
+<span class="n">pairs</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([[[</span><span class="n">item</span><span class="p">,</span> <span class="n">cate</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">]</span> <span class="k">for</span> <span class="n">cate</span><span class="p">,</span> <span class="n">items</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">()],</span> <span class="p">[])</span>
+<span class="c1"># [</span>
+<span class="c1">#     ['榕树', '植物'], </span>
+<span class="c1">#     ['杨树', '植物'], </span>
+<span class="c1">#     ['橡树', '植物'], </span>
+<span class="c1">#     ['兔子', '动物'], </span>
+<span class="c1">#     ['老虎', '动物'], </span>
+<span class="c1">#     ['大象', '动物']</span>
+<span class="c1"># ]</span>
+
+<span class="n">items</span> <span class="o">=</span> <span class="p">[</span><span class="n">pair</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">pairs</span><span class="p">]</span>
+<span class="c1"># ['榕树', '杨树', '橡树', '兔子', '老虎', '大象']</span>
+<span class="n">cates</span> <span class="o">=</span> <span class="p">[</span><span class="n">pair</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">pairs</span><span class="p">]</span>
+<span class="c1"># ['植物', '植物', '植物', '动物', '动物', '动物']</span>
+
+<span class="n">inverted_index</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">pairs</span><span class="p">)</span>
+<span class="c1"># {</span>
+<span class="c1">#     '榕树': '植物',</span>
+<span class="c1">#     '杨树': '植物', </span>
+<span class="c1">#     '橡树': '植物', </span>
+<span class="c1">#     '兔子': '动物', </span>
+<span class="c1">#     '老虎': '动物', </span>
+<span class="c1">#     '大象': '动物'</span>
+<span class="c1"># }</span>
+</code></pre></div><p data-pid="p7imQAwq">注：这里的代码主要用到了列表推导式，比如pairs那一行，用嵌套的列表推导式</p><div class="highlight"><pre><code class="language-python"><span></span><span class="p">[[[</span><span class="n">item</span><span class="p">,</span> <span class="n">cate</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">]</span> <span class="k">for</span> <span class="n">cate</span><span class="p">,</span> <span class="n">items</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+<span class="c1"># [</span>
+<span class="c1">#     [</span>
+<span class="c1">#         ['榕树', '植物'], </span>
+<span class="c1">#         ['杨树', '植物'], </span>
+<span class="c1">#         ['橡树', '植物']</span>
+<span class="c1">#     ],</span>
+<span class="c1">#     [</span>
+<span class="c1">#         ['兔子', '动物'], </span>
+<span class="c1">#         ['老虎', '动物'], </span>
+<span class="c1">#         ['大象', '动物']</span>
+<span class="c1">#     ]</span>
+<span class="c1"># ]</span>
+</code></pre></div><p data-pid="EszUl6uV">然后使用sum(·, [])的方式将其展平。这两步等价于使用循环嵌套</p><div class="highlight"><pre><code class="language-python"><span></span><span class="n">tmp</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">cate</span><span class="p">,</span> <span class="n">items</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
+        <span class="n">tmp</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">item</span><span class="p">,</span> <span class="n">cate</span><span class="p">])</span>
+</code></pre></div><p data-pid="-Z9LeR_b">这里只是抛砖引玉，等价的代码太多了，可以选用自己喜欢的风格。</p>

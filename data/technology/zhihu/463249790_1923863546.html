@@ -1,0 +1,29 @@
+<p data-pid="jAsyiR0Q">这是一个Verilog HDL语言定义的时钟分频模块，目的是将输入信号频率降到500,000分之一。一般来说FPGA板子的原始时钟信号频率都很高，在做按键检测、LED流水灯等多种低频应用时，往往需要降频。你可以百度一下「Verilog时钟分频模块」。</p><p data-pid="AEROG1Mj">我本来是不想回答这种问题的，因为我其实并不会Verilog语言，而且并不鼓励大家在知乎上问这种具体代码的问题，问题通用性差很少有人愿意回答。题主如果能问这个问题，也说明是上了相关课程的（比如数字电路），但凡有一点儿基础也是能自己解决的。</p><div class="highlight"><pre><code class="language-verilog"><span></span><span class="cm">/* 定义一个时钟分频模块 */</span>
+<span class="k">module</span> <span class="n">clock_div</span><span class="p">(</span>
+    <span class="k">input</span> <span class="n">clk</span><span class="p">,</span>          <span class="c1">// 输入的原始时钟信号</span>
+    <span class="k">input</span> <span class="n">reset</span><span class="p">,</span>        <span class="c1">// 输入的复位控制信号</span>
+    <span class="k">output</span> <span class="kt">reg</span> <span class="n">clkout</span>   <span class="c1">// 输出的分频时钟信号</span>
+<span class="p">);</span>
+    <span class="kt">wire</span> <span class="n">clk1s</span><span class="p">;</span> <span class="c1">// 这行貌似没用吧</span>
+    <span class="kt">reg</span> <span class="p">[</span><span class="mh">25</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span> <span class="n">div_counter</span> <span class="o">=</span> <span class="mh">0</span><span class="p">;</span> <span class="c1">// 定义26位寄存器，初始化为0</span>
+    
+    <span class="cm">/* clk和reset信号上升沿触发执行 */</span>
+    <span class="k">always</span> <span class="p">@(</span><span class="k">posedge</span> <span class="n">clk</span><span class="p">,</span> <span class="k">posedge</span> <span class="n">reset</span><span class="p">)</span>
+    <span class="k">begin</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">reset</span><span class="p">)</span> <span class="c1">// 如果是复位信号，就把寄存器清零，输出低电平</span>
+        <span class="k">begin</span> 
+            <span class="n">div_counter</span> <span class="o">&lt;=</span> <span class="mh">0</span><span class="p">;</span> <span class="n">clkout</span> <span class="o">&lt;=</span> <span class="mh">0</span><span class="p">;</span>
+        <span class="k">end</span>
+
+        <span class="c1">// 如果寄存器的值达到500,000，则输出信号电平翻转，寄存器清零重新计数</span>
+        <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">div_counter</span> <span class="o">&gt;=</span> <span class="mh">500000</span><span class="p">)</span>
+        <span class="k">begin</span>
+            <span class="n">div_counter</span> <span class="o">&lt;=</span> <span class="mh">0</span><span class="p">;</span> 
+            <span class="n">clkout</span> <span class="o">=</span> <span class="o">~</span><span class="n">clkout</span><span class="p">;</span>
+        <span class="k">end</span>
+
+        <span class="c1">// 未达到时间阈值，寄存器一直向上计数</span>
+        <span class="k">else</span> <span class="n">div_counter</span> <span class="o">=</span> <span class="n">div_counter</span> <span class="o">+</span> <span class="mh">1</span><span class="p">;</span>
+    <span class="k">end</span>
+<span class="k">endmodule</span>
+</code></pre></div><p data-pid="0OnaH7Tc">编程的路还很长，不是你求别人别人就可以帮你看代码的。100行可以看，1000行呢，10000行呢？或者拿一本几十万字的论文集找老师问里面的代码问题？</p>

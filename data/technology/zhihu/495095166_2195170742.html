@@ -1,0 +1,22 @@
+<p data-pid="PXV2Jvrc">首先，你的代码对于0的计算有误；其次，使用算数运算不像位运算效率高；另外，使用字符串可以方便一些。以下希望能给你带来启发：</p><div class="highlight"><pre><code class="language-python"><span></span><span class="n">x</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">input</span><span class="p">())</span>
+
+<span class="c1"># You can also use list</span>
+<span class="n">Rs</span> <span class="o">=</span> <span class="s2">""</span>
+
+<span class="c1"># Or `if x &lt; 0: x += 256`</span>
+<span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">256</span><span class="p">)</span> <span class="o">%</span> <span class="mi">256</span>
+
+<span class="c1"># Shift 8 times: when x equals 0, Rs automatically gets 0 prefix</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span><span class="p">):</span>
+    <span class="n">Rs</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">Rs</span>
+    <span class="n">x</span> <span class="o">&gt;&gt;=</span> <span class="mi">1</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">Rs</span><span class="p">)</span>
+</code></pre></div><p data-pid="UjBIh-U6">上面这份代码如果想进一步提高效率，可以使用列表，用<b>Rs.insert(0, elem)</b>而不是<b>[elem] + Rs</b>。</p><p data-pid="PwQb8l7g">至于如何在前面自动补零，如果非要用len：</p><div class="highlight"><pre><code class="language-python"><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">Rs</span><span class="p">)):</span>
+    <span class="n">Rs</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+</code></pre></div><p data-pid="bk1_hq7q">如果Rs是字符串，可以直接利用format：</p><div class="highlight"><pre><code class="language-python"><span></span><span class="c1"># python --version all</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="si">{:0&gt;8}</span><span class="s2">"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Rs</span><span class="p">))</span>
+<span class="c1"># python --version &gt;= 3.6</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{Rs:0&gt;8}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre></div><hr><p data-pid="2vRYS0Wb">所以，这个程序其实只需要一句话：</p><div class="highlight"><pre><code class="language-python"><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"{(x + 256) % 256:0&gt;8b}"</span><span class="p">)</span>
+</code></pre></div><p data-pid="hJjtKFZ5">欢迎关注，有其他问题随时私信讨论~</p>

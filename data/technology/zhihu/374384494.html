@@ -1,0 +1,53 @@
+<h2>写在前面</h2><p data-pid="_w8DjX9t">最近因为移动感知与智能计算的课程作业需要，翻箱倒柜找出本科时老师送我的一枚树莓派4b开始了紧张的开发过程。虽然以前开发过AT89C51、CC2530、STM32、MSP430，但是对树莓派完全不熟悉，这几天经过耐心尝试略有收获，在此记录一下，以不断完善我的技术栈。</p><p data-pid="tC9eL2Au">树莓派是嵌入式开发中一款性价比高、体积小、可编程的微型计算机。比起上述微控制器，树莓派的性能更强大，可以直接运行操作系统，上手学习也比较容易，但是直接部署的运行效率肯定不如底层专用设备强大，所以一直在学术界和工业界被认为是一款玩具。树莓派的第四代与第三代相比，板子上的配置有了较大调整。首先是主频提升到1.5GHz，内存上限也提升到8GB，电源接口变为了Type-C，原来的HDMI口也被替换成了双Micro HDMI口，参考<a href="http://link.zhihu.com/?target=https%3A//shumeipai.nxez.com/2019/06/26/raspberry-pi-4-review-the-new-gold-standard-for-single-board-computing.html%3Fvariant%3Dzh-cn" class=" wrap external" target="_blank" rel="nofollow noreferrer">树莓派4B性能评测报告及各版本性能比对</a>。现在它大概长这个样子：</p><figure data-size="normal"><noscript><img src="https://picx.zhimg.com/v2-1a5f337d4e6db8ed86b7cab6c5f49941_720w.jpg?source=d16d100b" data-caption="" data-size="normal" data-rawwidth="583" data-rawheight="341" class="origin_image zh-lightbox-thumb" width="583" data-original="https://pic1.zhimg.com/v2-1a5f337d4e6db8ed86b7cab6c5f49941_720w.jpg?source=d16d100b"></noscript><img src="data:image/svg+xml;utf8,&lt;svg%20xmlns='http://www.w3.org/2000/svg'%20width='583'%20height='341'&gt;&lt;/svg&gt;" data-caption="" data-size="normal" data-rawwidth="583" data-rawheight="341" class="origin_image zh-lightbox-thumb lazy" width="583" data-original="https://pic1.zhimg.com/v2-1a5f337d4e6db8ed86b7cab6c5f49941_720w.jpg?source=d16d100b" data-actualsrc="https://picx.zhimg.com/v2-1a5f337d4e6db8ed86b7cab6c5f49941_720w.jpg?source=d16d100b"></figure><p data-pid="ldzr6cUD">我没有购买显示屏也没有配置键鼠，面对这么一块赤裸裸的板子，多少有点束手无措。那么如何为树莓派注入灵魂让它「活」过来呢？</p><h2>开发流程</h2><p data-pid="KIP7V-fO">你可以没有输入输出的外设，但不能没有SD卡。我购买了一块闪迪的64GB的SD卡，作为树莓派的「硬盘」。尽量买16GB以上的，不然连系统本身可能都施展不开。当然你还需要读卡器和转接头（我使用的上位机是一台<b>MacBook</b> Pro。</p><figure data-size="normal"><noscript><img src="https://picx.zhimg.com/v2-e4fb794726fb6ba812883af007eefe86_720w.jpg?source=d16d100b" data-caption="" data-size="normal" data-rawwidth="4534" data-rawheight="2679" class="origin_image zh-lightbox-thumb" width="4534" data-original="https://picx.zhimg.com/v2-e4fb794726fb6ba812883af007eefe86_720w.jpg?source=d16d100b"></noscript><img src="data:image/svg+xml;utf8,&lt;svg%20xmlns='http://www.w3.org/2000/svg'%20width='4534'%20height='2679'&gt;&lt;/svg&gt;" data-caption="" data-size="normal" data-rawwidth="4534" data-rawheight="2679" class="origin_image zh-lightbox-thumb lazy" width="4534" data-original="https://picx.zhimg.com/v2-e4fb794726fb6ba812883af007eefe86_720w.jpg?source=d16d100b" data-actualsrc="https://picx.zhimg.com/v2-e4fb794726fb6ba812883af007eefe86_720w.jpg?source=d16d100b"></figure><p data-pid="M79KKspR">首先去<a href="http://link.zhihu.com/?target=https%3A//www.raspberrypi.org/software/operating-systems/" class=" wrap external" target="_blank" rel="nofollow noreferrer">树莓派官网</a>下载树莓派官方操作系统Raspberry Pi OS。它以前叫Raspbian，有些博客里会看到这个名字，可能是Debian系统改造过来的，命令和Debian差不多。我这里选择的是Raspberry Pi OS Lite这个轻量级的系统，它只有442MB大小。因为我们没有屏幕，自然也就对桌面界面没什么要求。下载之后是一个zip压缩包，解压可以得到img镜像文件，大概2GB。</p><div class="highlight"><pre><code class="language-text"><span></span>2021-03-04-raspios-buster-armhf-lite.img
+</code></pre></div><p data-pid="CfHAcuS1">我们把SD卡通过读卡器和转接头插到电脑上，然后在命令行中查看已挂载的卷</p><div class="highlight"><pre><code class="language-text"><span></span>df -h
+-----------------------------------------------------------------------------------------------
+Filesystem       Size   Used  Avail Capacity iused      ifree %iused  Mounted on
+/dev/disk1s1s1  466Gi   14Gi  327Gi     5%  568975 4881883905    0%   /
+devfs           193Ki  193Ki    0Bi   100%     668          0  100%   /dev
+/dev/disk1s5    466Gi   20Ki  327Gi     1%       0 4882452880    0%   /System/Volumes/VM
+/dev/disk1s3    466Gi  379Mi  327Gi     1%    1583 4882451297    0%   /System/Volumes/Preboot
+/dev/disk1s6    466Gi  2.1Mi  327Gi     1%      14 4882452866    0%   /System/Volumes/Update
+/dev/disk1s2    466Gi  124Gi  327Gi    28% 1456661 4880996219    0%   /System/Volumes/Data
+map auto_home     0Bi    0Bi    0Bi   100%       0          0  100%   /System/Volumes/Data/home
+/dev/disk2s1    255Mi  119Mi  136Mi    47%     512          0  100%   /Volumes/system-boot
+</code></pre></div><p data-pid="kfWrcdNe">我们看到桌面多出来的那个磁盘的图标名字叫system-boot，所以上面结果中最后一行是新挂载的卷。接下来我们擦除SD卡的所有内容（有时候买SD卡的时候会有预装的镜像。</p><div class="highlight"><pre><code class="language-text"><span></span>diskutil eraseVolume HFS+ system-boot /dev/disk2s1
+----------------------------------------------------------------------
+Started erase on disk2s1 (system-boot)
+Unmounting disk
+Erasing
+Initialized /dev/rdisk2s1 as a 255 MB case-insensitive HFS Plus volume
+Mounting disk
+Finished erase on disk2s1 (system-boot)
+</code></pre></div><p data-pid="A_8T8Qm_">这里system-boot是卷[volume]名，而/dev/disk2s1是分区位置。接下来将该分区卸载。</p><div class="highlight"><pre><code class="language-text"><span></span>diskutil unmount /dev/disk2s1
+---------------------------------------
+Volume system-boot on disk2s1 unmounted
+</code></pre></div><p data-pid="y-cix8Lx">然后我们使用dd命令将系统镜像写入到SD卡中</p><div class="highlight"><pre><code class="language-text"><span></span>sudo dd if=Downloads/2021-03-04-raspios-buster-armhf-lite.img of=/dev/disk2 bs=4m
+-----------------------------------------------------------------------------
+445+0 records in
+445+0 records out
+1866465280 bytes transferred in 180.176146 secs (10359114 bytes/sec)
+</code></pre></div><p data-pid="BxtGUHD9">这里if后面是刚刚下载的系统镜像文件的路径，of后面是分区的位置，注意这里我写的是disk2而不是disk2s1，因为我猜disk2s1是disk2的子分区，而后者空间更大一些。这个过程比较慢，需要等一段时间。成功之后我们查看桌面，发现挂载的硬盘的名字变成了boot，打开可以看到里面有一堆文件。</p><div class="highlight"><pre><code class="language-text"><span></span>ls /Volumes/boot
+--------------------------------------------------------------
+COPYING.linux            bcm2711-rpi-400.dtb      kernel.img
+LICENCE.broadcom         bcm2711-rpi-cm4.dtb      kernel7.img
+bcm2708-rpi-b-plus.dtb   bootcode.bin             kernel7l.img
+bcm2708-rpi-b-rev1.dtb   cmdline.txt              kernel8.img
+bcm2708-rpi-b.dtb        config.txt               overlays
+bcm2708-rpi-cm.dtb       fixup.dat                start.elf
+bcm2708-rpi-zero-w.dtb   fixup4.dat               start4.elf
+bcm2708-rpi-zero.dtb     fixup4cd.dat             start4cd.elf
+bcm2709-rpi-2-b.dtb      fixup4db.dat             start4db.elf
+bcm2710-rpi-2-b.dtb      fixup4x.dat              start4x.elf
+bcm2710-rpi-3-b-plus.dtb fixup_cd.dat             start_cd.elf
+bcm2710-rpi-3-b.dtb      fixup_db.dat             start_db.elf
+bcm2710-rpi-cm3.dtb      fixup_x.dat              start_x.elf
+bcm2711-rpi-4-b.dtb      issue.txt
+</code></pre></div><p data-pid="fa65NzGF">这时系统写入完成，但不要着急推出硬盘，我们还需要一个关键操作来启动ssh连接服务：在boot文件夹中新建一个空的ssh文件！</p><div class="highlight"><pre><code class="language-text"><span></span>touch /Volumes/boot/ssh
+</code></pre></div><p data-pid="e7cwEmJe">这时树莓派在启动时就会自动开启ssh服务了，我仅仅尝试过这一版系统，但听说有些系统这么做没用。除此之外，我还修改了一处配置，我不敢保证不设置它不会出错。</p><p data-pid="A6cs2vni">由于树莓派没有传统意义上的BIOS，所以各种系统配置参数通常被存在boot的config.txt这个文本文件中。我们找到下面这行配置，并打开注释。</p><div class="highlight"><pre><code class="language-text"><span></span>hdmi_force_hotplug=1
+</code></pre></div><p data-pid="rGM3-Gz5">这使得树莓派启动后，即使不接显示器，依然认为有显示器信号输入，也就是相当于骗过了系统。接下来我们推出硬盘，将树莓派的网口使用网线连接到一个有权限访问的路由器上，然后使用电源线给树莓派供电。这个连接网线和上电的顺序很重要！</p><p data-pid="eqguS5vJ">还好前一阵子给实验室修理网络，对所有路由器了如指掌。我实验室的主路由器是思科的，登录路由器管理界面，在里面的DHCP status一栏可以找到路由器为接入的设备分配的局域网IP。当然你也可以使用其他的局域网扫描工具，只要找到树莓派的IP即可。</p><div class="highlight"><pre><code class="language-text"><span></span>raspberrypi		192.168.1.146	dc:a6:32:c4:a7:e9	23 Hours, 57 Minutes, 1 Seconds
+</code></pre></div><p data-pid="aG9o9hPp">因为学长把DHCP的过期时间设置成一天了，所以看到了诸多名为raspberrypi的设备，我挨个ping了一遍，发现上面的是可以ping通的。然后我们通过ssh登录它的默认用户pi。</p><div class="highlight"><pre><code class="language-text"><span></span>ssh pi@192.168.1.146
+</code></pre></div><p data-pid="-W-aDA5p">默认密码是raspberry。<b>2024年8月25日更新</b>：截止目前，最新的树莓派系统没有默认密码，我们需要在根目录（<code>/Volumes/boot/ssh</code>）下添加userconf.txt文件，并写入以下内容：</p><div class="highlight"><pre><code class="language-text"><span></span>pi:$6$/4.VdYgDm7RJ0qM1$FwXCeQgDKkqrOU3RIRuDSKpauAbBvP11msq9X58c8Que2l1Dwq3vdJMgiZlQSbEXGaY5esVHGBNbCxKLVNqZW1
+</code></pre></div><p data-pid="2nEeEOa1">然后密码就被设置成了raspberry。这段代码的工作原理类似linux的<code>/etc/shadow</code>，参考<a href="http://link.zhihu.com/?target=https%3A//c.biancheng.net/view/840.html" class=" wrap external" target="_blank" rel="nofollow noreferrer">Linux /etc/shadow（影子文件）内容解析（超详细）</a>。 </p><p data-pid="uRPr0Qlw">至此，我们成功为树莓派注入灵魂，并且可以和它通话了。正如我上面所说，树莓派操作系统和Debian很像，或者说和Ubuntu很像，所以命令多数都兼容。大家想hello world也可以，来</p><div class="highlight"><pre><code class="language-text"><span></span>root@raspberrypi:~# echo "hello world"
+--------------------------------------
+hello world
+</code></pre></div><p data-pid="uxYwtoie">虽然说硬件一般不流行Hello world，流行呼吸灯什么的 ...</p><p data-pid="dqnTpYuD">大家可能注意到上面的pi用户是普通用户，总是sudo用起来不方便。如何解锁root用户，并实现ssh免密码登录树莓派，且听下回分解。</p>

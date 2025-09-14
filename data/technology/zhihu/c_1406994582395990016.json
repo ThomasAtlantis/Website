@@ -1,0 +1,59 @@
+{
+  "title": "项目开发整活儿",
+  "description": "记录课余研究的一些略有用处的项目实践",
+  "type": "category",
+  "items_count": 7,
+  "children": {
+    "9355079293": {
+      "title": "换手机号：从1w+短信中提取注册过的145个账号",
+      "href": "https://zhuanlan.zhihu.com/p/9355079293",
+      "type": "article",
+      "updated_time": 1732722407,
+      "created_time": 1732722101
+    },
+    "633736038": {
+      "title": "NVIDIA Jetson Nano捕鼠计划",
+      "href": "https://zhuanlan.zhihu.com/p/633736038",
+      "type": "article",
+      "updated_time": 1685712610,
+      "created_time": 1685712244
+    },
+    "465414796": {
+      "title": "Python爬虫 | JSON字段的高效自动化提取",
+      "href": "https://zhuanlan.zhihu.com/p/465414796",
+      "type": "article",
+      "updated_time": 1644464535,
+      "created_time": 1644412680
+    },
+    "411043937": {
+      "title": "Pyparsing快速构建解释器 | 实战搜索查询语法",
+      "href": "https://zhuanlan.zhihu.com/p/411043937",
+      "type": "article",
+      "updated_time": 1631963256,
+      "created_time": 1631807273
+    },
+    "357085490": {
+      "title": "围棋棋谱扫描工具开发实验 - 后续",
+      "href": "https://zhuanlan.zhihu.com/p/357085490",
+      "type": "article",
+      "updated_time": 1616167101,
+      "created_time": 1616069760
+    },
+    "347539186": {
+      "title": "围棋棋谱扫描工具开发实验",
+      "href": "https://zhuanlan.zhihu.com/p/347539186",
+      "type": "article",
+      "updated_time": 1611824209,
+      "created_time": 1611824209
+    },
+    "309191767_1676178749": {
+      "title": "iPad是否有手写公式自动转换为LaTeX的App？",
+      "href": "https://www.zhihu.com/question/309191767/answer/1676178749",
+      "type": "answer",
+      "updated_time": 1610534127,
+      "created_time": 1610533801
+    }
+  },
+  "target_dir": "./tmp/zhihu",
+  "updated_time": 1756865343
+}

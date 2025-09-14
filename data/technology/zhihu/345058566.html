@@ -1,0 +1,153 @@
+<p data-pid="ymPUKUMI">本系列文章长期维护更新，希望Python编程水平逐日精进</p><ul><li data-pid="mdBC_bs4"><a href="https://zhuanlan.zhihu.com/p/344907422" class="internal" target="_blank">Python高级编程 | 知识碎片</a></li><li data-pid="TF0FEFR0"><a href="https://zhuanlan.zhihu.com/p/345058566" class="internal" target="_blank">Python高级编程 | 奇技淫巧</a></li><li data-pid="HjZaKJBn"><a href="https://zhuanlan.zhihu.com/p/345187339" class="internal" target="_blank">Python高级编程 | 走火入魔</a></li></ul><h2>列表中出现频率最高的元素</h2><p data-pid="A3FPIlK8"><b>方法一</b> 记住<code>max()</code>、<code>min()</code>这些内置函数实际上是有key参数的。和<code>sorted</code>方法的key参数类似，这里传入的是一个函数，即<code>list.count()</code>，在其他情形下也可使用匿名函数。这里使用先将列表test转为集合去重，避免多次查询同一个元素的出现频次。 </p><div class="highlight"><pre><code class="language-python"><span></span><span class="nb">max</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">test</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="n">test</span><span class="o">.</span><span class="n">count</span><span class="p">)</span>
+</code></pre></div><p data-pid="issh0bJ3"><b>方法二</b> 使用collections库，它主要提供了几种额外的数据结构的封装，这里使用的Counter对列表中的可哈希对象进行计数。<code>Counter(list)</code>返回一个关键字为原始元素，记录值为对应的计数值的字典。其<code>most_common(k)</code>方法返回一个列表，每个元素为出现频率前k大的原始元素和对应计数值的二元组。实际上Counter也提供了从计数字典反向得到原始列表的方法，详情请见<a href="http://link.zhihu.com/?target=https%3A//docs.python.org/zh-cn/3/library/collections.html%23collections.Counter" class=" wrap external" target="_blank" rel="nofollow noreferrer">官方文档</a>。</p><div class="highlight"><pre><code class="language-python"><span></span><span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">(</span><span class="n">words</span><span class="p">)</span><span class="o">.</span><span class="n">most_common</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+</code></pre></div><h2>列表作为字典值的无判断扩充</h2><p data-pid="jZW4KjiC">利用字典的<code>setdefault(key, value)</code>方法，在查询的key不存在时，将它加入字典并把值设置为value，同时返回该值的引用。这样写可以节省判断逻辑，更加简练。</p><div class="highlight"><pre><code class="language-python"><span></span><span class="n">d</span> <span class="o">=</span> <span class="p">{}</span> 
+<span class="n">d</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">23</span><span class="p">)</span> 
+<span class="n">d</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span>
+</code></pre></div><h2>指定分隔符合并输出列表内容</h2><div class="highlight"><pre><code class="language-python"><span></span><span class="n">row</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"I"</span><span class="p">,</span> <span class="s2">"love"</span><span class="p">,</span> <span class="s2">"python"</span><span class="p">]</span> 
+<span class="c1"># method-1</span>
+<span class="nb">print</span><span class="p">(</span><span class="o">*</span><span class="n">row</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">" "</span><span class="p">)</span>
+<span class="c1"># method-2</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">' '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">row</span><span class="p">))</span>
+</code></pre></div><h2>匿名函数中添加非返回语句</h2><p data-pid="QQB5mZPS">匿名函数往往只有参数列表，然后就是返回值。下面提供一种函数体包含非返回语句的写法，没有什么技术含量，只是觉得优雅。</p><div class="highlight"><pre><code class="language-python"><span></span><span class="c1"># 定义一个curry风格函数</span>
+<span class="n">x</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="p">[</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> 
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"..."</span><span class="p">),</span>
+    <span class="n">x</span>
+<span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</code></pre></div><p data-pid="iRSKRPFk">这个有点类似C语言的GCC扩展语法中的具有返回值的复合语句。复合语句是大括号包围的语句块，其返回值是复合语句中最后一个表达式的类型和值，很类似：</p><div class="highlight"><pre><code class="language-text"><span></span>// ret = 8
+ret = ({
+    int a = 5;
+    int b;
+    b = a + 3;
+});
+</code></pre></div><h2>TOP-K: 取最大/最小的K个值</h2><div class="highlight"><pre><code class="language-cpp"><span></span><span class="n">import</span> <span class="n">heapq</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">heapq</span><span class="p">.</span><span class="n">nlargest</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="p">[</span>
+    <span class="p">{</span><span class="sc">'S'</span><span class="o">:</span> <span class="mi">5</span><span class="p">,</span> <span class="sc">'H'</span><span class="o">:</span> <span class="mi">3</span><span class="p">},</span> 
+    <span class="p">{</span><span class="sc">'S'</span><span class="o">:</span> <span class="mi">7</span><span class="p">,</span> <span class="sc">'H'</span><span class="o">:</span> <span class="mi">1</span><span class="p">},</span> 
+    <span class="p">{</span><span class="sc">'S'</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span> <span class="sc">'H'</span><span class="o">:</span> <span class="mi">2</span><span class="p">}</span>
+<span class="p">],</span> <span class="n">key</span><span class="o">=</span><span class="n">lambda</span> <span class="nl">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="sc">'S'</span><span class="p">]))</span>
+<span class="cp"># output: [</span><span class="p">{</span><span class="sc">'H'</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="sc">'S'</span><span class="o">:</span> <span class="mi">7</span><span class="p">},</span> <span class="p">{</span><span class="sc">'H'</span><span class="o">:</span> <span class="mi">3</span><span class="p">,</span> <span class="sc">'S'</span><span class="o">:</span> <span class="mi">5</span><span class="p">}]</span>
+</code></pre></div><h2>序列逆序</h2><div class="highlight"><pre><code class="language-python"><span></span><span class="c1"># method-1 reversed</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">reversed</span><span class="p">([</span><span class="s1">'L'</span><span class="p">,</span> <span class="s1">'G'</span><span class="p">,</span> <span class="s1">'PK'</span><span class="p">])))</span>
+
+<span class="c1"># method-2 slice</span>
+<span class="nb">print</span><span class="p">([</span><span class="s1">'L'</span><span class="p">,</span> <span class="s1">'G'</span><span class="p">,</span> <span class="s1">'PK'</span><span class="p">][::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+</code></pre></div><h2>列表展平</h2><div class="highlight"><pre><code class="language-text"><span></span>s = [1, [2, [3, [4, [5, 6], 7], 8], (9, 0)]]
+f = lambda x: [y for _x in x for y in f(_x)] if isinstance(x, (list, tuple)) else [x]
+
+print(f(s))  # [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]
+</code></pre></div><p data-pid="DA_6TKq3">除此之外，还有一些神奇的做法</p><div class="highlight"><pre><code class="language-text"><span></span>x = [[1, 2, 3], [4, 5], [6]]
+sum(x, [])
+# [1, 2, 3, 4, 5, 6]
+</code></pre></div><p data-pid="cDwbowgs">但是注意这里只允许列表是标准的单层嵌套，也就是说每个元素都必须是列表，该方法只能展开一层</p><div class="highlight"><pre><code class="language-text"><span></span>import numpy as np
+x = np.array([[[1, 2], [3, 4]], [[4, 5], [6, 7]]])
+x.flatten()
+# array([1, 2, 3, 4, 4, 5, 6, 7])
+</code></pre></div><p data-pid="UKHYtT99">注意这里的numpy展平方式更加局限，它要求各元素维度相同，但它可以全部展开，而以上的sum方法只能展开一层</p><p data-pid="bowjfJEf">列表的展平在机器学习中处理数据时经常会用到。给定的数据集的格式有时候是一层套一层，比如说matlab的.mat文件的读取。当然这个时候不同样本的格式相同，我们也可以用固定的解包方法。下面是我在做ECG分析时遇到的恶心数据集，来自上海的三甲医院。</p><div class="highlight"><pre><code class="language-python"><span></span><span class="n">data</span> <span class="o">=</span> <span class="p">[[[[[</span><span class="mi">23</span><span class="p">]],</span> <span class="p">[</span><span class="s1">'窦性心律_不完全性右束支传导阻滞'</span><span class="p">],</span> <span class="p">[</span><span class="mi">12</span><span class="p">],</span> <span class="p">[</span><span class="o">...</span><span class="p">]]]]</span>
+<span class="p">[[</span><span class="n">size</span><span class="p">]],</span> <span class="p">[</span><span class="n">label</span><span class="p">],</span> <span class="p">[</span><span class="n">_</span><span class="p">],</span> <span class="p">[</span><span class="n">sample</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">sample</span><span class="p">)</span> <span class="c1"># 23 窦性心律_不完全性右束支传导阻滞 Ellipsis</span>
+</code></pre></div><p data-pid="d093_31W">与之类似的还有下面format函数的自动解包，相当于将解包与输出这两个步骤合并在一起了。</p><h2>Format自动解包</h2><div class="highlight"><pre><code class="language-text"><span></span># code
+t = [{'protocol': 'https'}, 'landgrey.me', '443']
+print("{0[0][protocol]}://{0[1]}:{0[2]}".format(t))
+
+# output
+https://landgrey.me:443
+</code></pre></div><h2>列表去重</h2><div class="highlight"><pre><code class="language-text"><span></span>array = ['c', 'a', 'c', 'd', 'b', 'b', 'a', 'a', 'f']
+
+# method-1 转换为集合
+print(list(set(array)))
+
+# method-2 列表推导式 1
+uniq = []
+[uniq.append(x) for x in array if x not in uniq]
+print(uniq)
+
+# method-3 列表推导式 2
+print([x for y, x in enumerate(array) if array.index(x) == y])
+</code></pre></div><p data-pid="YLHpJ0ik">注意方法一使用集合固然简单，但是不保序。方法二不能将三行合并为一行，它与方法三主要的区别在于如何在给列表添加元素的过程中动态检索列表，方法三的index可以从头查找当前元素第一次出现的位置，在第一次出现时将其加入。</p><h2>排序技巧</h2><div class="highlight"><pre><code class="language-text"><span></span># method-1 从小到大排序
+import heapq
+k = [2, 6, 1, 5, 3, 4]
+print(heapq.nsmallest(len(k), k))
+# output-1: [1, 2, 3, 4, 5, 6]
+
+# method-2 先按长度、再按 ascii 值从小到大依次排序
+print(sorted(['LG', 'cdn', 'dll', 'BBQ', 'afun'], key=lambda x: (len(x), x)))
+# output-2: ['LG', 'BBQ', 'cdn', 'dll', 'afun']
+
+# method-3 按 value 排序, 无序字典变有序字典
+from collections import OrderedDict
+d = {'apple': 1, 'orange': 3, 'banana': 4, 'tomato': 2}
+print(OrderedDict((x, y) for x, y in sorted(d.items(), key=lambda x: x[1])))
+# output-3: OrderedDict([('apple', 1), ('tomato', 2), ('orange', 3), ('banana', 4)])
+</code></pre></div><h2>字典合并</h2><div class="highlight"><pre><code class="language-text"><span></span>d1 = {'a': 1}
+d2 = {'b': 2}
+
+# 三种方法
+d1.update({'b': 2})
+d = dict(d1, **d2)
+d = {**d1, **d2}
+</code></pre></div><h2>zip分配生成字典</h2><div class="highlight"><pre><code class="language-text"><span></span>print(dict(zip('AABCD', xrange(5))))
+# {'A': 1, 'C': 3, 'B': 2, 'D': 4}
+# 本质 dict(list([(k1, v1), (k2, v2)]), ...)
+</code></pre></div><h2>switch-case写法</h2><p data-pid="ruZrAczl">我见过的最优雅、最像switch的写法，没有之一</p><div class="highlight"><pre><code class="language-text"><span></span>def switch(case):
+    return {
+        0: "&gt;",
+        1: "&lt;",
+        2: "="
+    }.get(case, "?")
+
+print(switch(1))  # &lt;
+</code></pre></div><h2>条件过滤器</h2><p data-pid="KCI3uj7P">map、filter、reduce都是必会技能</p><div class="highlight"><pre><code class="language-text"><span></span>print(filter(lambda x: "T" in x, ["TIT", "YoY"]))  # ['TIT']
+</code></pre></div><h2>输出类中无注释的函数列表</h2><p data-pid="gmJXLonG">这个问题来自<a href="https://www.zhihu.com/question/438680458" class="internal" target="_blank">Python如何调用一个py文件并输出部分行内容？</a></p><p data-pid="6uXm09ra">已知类的定义如下</p><div class="highlight"><pre><code class="language-text"><span></span>class Foo:
+
+    def __init__(self, initial_balance=0):
+        self.balance = initial_balance
+
+    def deposit(self, amount):
+        '''Deposit amount'''
+        self.balance += amount
+
+    def withdraw(self, amount):
+        '''Withdraw amount'''
+        self.balance -= amount
+
+    def overdrawn(self):
+        return self.balance &lt; 0
+</code></pre></div><p data-pid="EVCWBU5I">输出无注释的函数列表</p><div class="highlight"><pre><code class="language-text"><span></span>print([func.__name__ for func in Foo.__dict__.values() if callable(func) and not func.__doc__])
+# ['__init__', 'overdrawn']
+</code></pre></div><h2>从右向左替换字符串</h2><div class="highlight"><pre><code class="language-text"><span></span># code 
+def rreplace(self, old, new, *max):
+    count = len(self)
+    if max and str(max[0]).isdigit():
+        count = max[0]
+    return new.join(self.rsplit(old, count))
+
+print rreplace("lemon tree", "e", "3")
+print rreplace("lemon tree", "e", "3", 1)
+
+# output
+l3mon tr33
+lemon tre3
+</code></pre></div><h2>命令行调用程序中的函数</h2><div class="highlight"><pre><code class="language-text"><span></span># test_arg.py
+import sys
+
+def praise(sb):
+    print(f"{sb} is awesome!")
+
+this_module = sys.modules[__name__]
+getattr(this_module, sys.argv[1])(*sys.argv[2:])
+</code></pre></div><p data-pid="jDB_CNm7">sys.modules[__name__]获取当前程序的对象，get_attr()获取程序中的方法或变量，所以sys.argv[1]存储要调用的函数，而后面加括号是调用这个函数，sys.argv[2:]是这个函数的参数</p><div class="highlight"><pre><code class="language-text"><span></span>python test_arg.py praise python
+# python is awesome!
+</code></pre></div><h2>简易HTTPServer</h2><p data-pid="0yf4gGin">这个我经常用于局域网内电脑之间互传文件，非常方便。对于服务器可以使用PuTTy的端口映射，也可以实现从服务器下载文件。</p><div class="highlight"><pre><code class="language-text"><span></span># code
+python2 -m SimpleHTTPServer 53
+python3 -m http.server 53
+
+# note
+监听的默认地址是 0.0.0.0, 对外开放, 可目录浏览
+</code></pre></div><blockquote data-pid="plpmGUsO">以下是不太重要或意义不大的技巧，可以忽略</blockquote><h2>彩蛋攻击</h2><div class="highlight"><pre><code class="language-text"><span></span># code for python2
+[reload(__import__("YW50aWdyYXZpdHk=".decode("base64"))) for x in range(666)]
+
+# code for python3
+[__import__("imp").reload(__import__("antigravity")) for x in range(666)]
+</code></pre></div><h2>节省人力的小众module</h2><table data-draft-node="block" data-draft-type="table" data-size="normal" data-row-style="normal"><tbody><tr><td>string.ascii_letters</td><td>ASCII字符表</td></tr><tr><td>pypinyin.pinyin</td><td>获取词语的汉语拼音</td></tr></tbody></table><p></p><p></p>
