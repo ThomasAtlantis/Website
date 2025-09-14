@@ -46,15 +46,22 @@ const DetailArticle: React.FC = () => {
         return content.split('\n\n').filter(paragraph => paragraph.trim() !== '');
     };
 
-    // 分离注释段落和诗歌段落
+    let annotationStarted = false;
     const separateParagraphs = (paragraphs: string[]) => {
         const poemParagraphs: string[] = [];
         const commentLines: string[] = [];
 
         paragraphs.forEach(paragraph => {
             if (paragraph.trim().startsWith('———')) {
-                // 将注释内容按行分割
+                annotationStarted = true;
                 const lines = paragraph.replace(/^—+/, '').split('\n');
+                commentLines.push(...lines);
+            } else if (paragraph.trim().startsWith('注：')) {
+                annotationStarted = true;
+                const lines = paragraph.split('\n');
+                commentLines.push(...lines);
+            } else if (annotationStarted) {
+                const lines = paragraph.split('\n');
                 commentLines.push(...lines);
             } else {
                 poemParagraphs.push(paragraph);
