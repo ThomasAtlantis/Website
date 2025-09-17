@@ -117,3 +117,38 @@ width: 12px;
 height: 12px;
 opacity: 0.6;
 }
+
+.reviewItem {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 12px;
+    padding-top: 0;
+    text-align: justify;
+    padding-bottom: 12px;
+    transition: all 0.3s ease;
+    position: relative;
+    line-break: anywhere;
+
+    span {
+        color: #999;
+        font-size: 12px;
+    }
+}
+.literatureArticleImage {
+    min-width: 80px;
+    min-height: 120px;
+    object-fit: cover;
+}
+.literatureArticleMeta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+.reviewRating {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 4px;
+}
