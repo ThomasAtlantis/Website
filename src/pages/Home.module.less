@@ -647,29 +647,308 @@
   grid-column: span 3;
 }
 
-// 响应式调整
+// 响应式调整 - 手机端布局
+// 确保桌面端布局在768px以上保持不变
 @media (max-width: 768px) {
+  .home {
+    padding: 0 60px 20px 60px; // 与其他页面保持一致的左右padding
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  // 导航栏在手机端的调整
+  .navRow {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center; // 确保垂直居中对齐
+    justify-content: space-between; // 左右分布
+    width: 100%;
+    padding: 40px 15px 15px 15px; // 增加顶部padding，与其他页面保持一致
+    margin: -20px 0 20px 0; // 只抵消上下边距，不抵消左右边距
+    box-sizing: border-box;
+    position: fixed; // 固定定位，与其他页面一致
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background-color: #fff;
+    border-bottom: 1px solid #eee;
+  }
+
+  .logoContainer {
+    margin-top: 0; // 移除顶部边距
+    margin-left: 0; // 移除左侧边距
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .navSpacer {
+    display: none; // 隐藏spacer，因为使用justify-content: space-between
+  }
+
+  .navContainer {
+    position: static;
+    right: auto;
+    top: auto;
+    flex: 0 0 auto;
+  }
+
+  .navMenu {
+    gap: 15px;
+  }
+
+  .navItem a {
+    font-size: 16px;
+  }
+
+  // 内容行在手机端改为垂直布局
+  .contentRow {
+    display: flex;
+    flex-direction: column;
+    max-height: none;
+    flex: 1;
+    gap: 20px;
+    margin-top: 120px; // 调整顶部间距，适应导航栏增加的padding
+  }
+
+  // 第一列copyright在手机端移动到页面底部
+  .column1 {
+    order: 999; // 确保在最后显示
+    flex: none;
+    width: 100%;
+    min-height: auto;
+    height: auto;
+    justify-content: flex-start;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
+    
+    p {
+      writing-mode: horizontal-tb; // 恢复水平排列
+      text-orientation: mixed;
+      transform: none; // 取消旋转
+      text-align: center;
+      font-size: 12px;
+      margin: 0;
+      color: #919191;
+    }
+  }
+
+  // 第二列主要内容
+  .column2 {
+    flex: none;
+    width: 100%;
+    order: 1;
+  }
+
+  .title {
+    font-size: 48px;
+    text-align: center;
+    margin-bottom: 20px;
+    line-height: 1.2;
+  }
+
+  .titleContainer {
+    margin-bottom: 20px;
+  }
+
+  .socialSection {
+    justify-content: center;
+    margin: 20px 0;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .socialIcons {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .aboutButton {
+    margin: 0 5px;
+    flex-shrink: 0;
+    min-height: 44px; // 增加触摸目标大小
+    padding: 8px 16px;
+  }
+
+  // 第三列
+  .column3 {
+    flex: none;
+    width: 100%;
+    order: 2;
+    margin-top: 0;
+    padding-left: 0;
+    
+    img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+  }
+
+  // 第四列
+  .column4 {
+    flex: none;
+    width: 100%;
+    order: 3;
+    padding-left: 0;
+    
+    img {
+      position: static;
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+  }
+
+  // 第五列
+  .column5 {
+    flex: none;
+    width: 100%;
+    order: 4;
+    
+    .poemSection {
+      position: static;
+      width: 100%;
+      background-color: transparent;
+      border: none;
+      height: auto;
+      padding: 0;
+      margin-top: 10px;
+    }
+  }
+
+  // 诗歌部分在手机端的调整
+  .poemSection {
+    font-size: 16px !important; // 增大字体大小，使用!important确保覆盖
+    line-height: 1.6;
+    border-left: none;
+    border-top: 1px solid #e0e0e0;
+    padding-top: 15px;
+    margin-top: 15px;
+    
+    p {
+      font-size: 16px !important; // 确保p标签也使用大字体
+    }
+  }
+
+  .row {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .poemColumn {
+    width: 100%;
+  }
+
+  .imgBelowTitle {
+    margin: 20px 0;
+    border-radius: 8px;
+  }
+
+  .annotation {
+    padding-right: 0;
+    text-align: left;
+    font-size: 11px;
+  }
+
+  // 图片网格在手机端的调整
   .imageGrid {
-    grid-template-columns: repeat(3, 1fr); // 移动端3列
+    grid-template-columns: repeat(2, 1fr); // 手机端2列
     gap: 8px;
-    padding: 0 10px;
-    top: calc(100vh - 150px); // 调整位置
+    padding: 0;
+    margin-top: 30px;
+    order: 5;
+    width: 100%;
   }
   
   .span2 {
     grid-column: span 2;
   }
+
+  .gridItem {
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .gridImage {
+    transition: transform 0.2s ease;
+  }
 }
 
 @media (max-width: 480px) {
-  .imageGrid {
-    grid-template-columns: repeat(2, 1fr); // 小屏幕2列
+  .home {
+    padding: 0 15px 20px 15px; // 小屏幕使用较小的padding
+  }
+
+  .navRow {
+    padding: 35px 10px 10px 10px; // 增加顶部padding，与其他页面保持一致
+    margin: -15px 0 20px 0; // 只抵消上下边距，不抵消左右边距
+    position: fixed; // 固定定位，与其他页面一致
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background-color: #fff;
+    border-bottom: 1px solid #eee;
+  }
+
+  .contentRow {
+    margin-top: 110px; // 调整顶部间距，适应导航栏增加的padding
+  }
+
+  .title {
+    font-size: 36px;
+  }
+
+  .poemSection {
+    font-size: 16px !important; // 小屏幕的诗歌字体大小，使用!important确保覆盖
+    
+    p {
+      font-size: 16px !important; // 确保p标签也使用大字体
+    }
+  }
+
+  .navItem a {
+    font-size: 14px;
+  }
+
+  .navMenu {
+    gap: 10px;
+  }
+
+  .socialIcons {
     gap: 6px;
-    top: calc(100vh - 120px); // 调整位置
+  }
+
+  .socialIcon {
+    width: 32px;
+    height: 32px;
+    
+    img {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  .aboutButton {
+    font-size: 12px;
+    padding: 6px 12px;
+    min-height: 40px;
+    margin: 2px;
+  }
+
+  .imageGrid {
+    grid-template-columns: 1fr; // 小屏幕1列
+    gap: 6px;
   }
   
   .span2 {
-    grid-column: span 2; // 在小屏幕上，宽图片占满2列
+    grid-column: span 1; // 在小屏幕上，所有图片都是单列
   }
 }
 

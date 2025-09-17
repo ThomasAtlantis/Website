@@ -14,7 +14,7 @@ Typescript + React + Vite + GitHub Actions + GitHub Pages
 - [ ] Dev: project page
 - [x] Dev: about page
 - [ ] UX: image placeholder for homepage during loading
-- [ ] UI/UX: responsive design for all pages
+- [x] UI/UX: responsive design for all pages
 - [ ] Dev: administrative website
   - [ ] Dev: front-end, use Ant Design
   - [ ] Dev: back-end, implement data structure and use flask as server

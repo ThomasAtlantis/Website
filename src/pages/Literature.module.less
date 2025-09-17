@@ -118,6 +118,75 @@ height: 12px;
 opacity: 0.6;
 }
 
+// 响应式设计
+@media (max-width: 768px) {
+  .literatureRow {
+    flex-direction: column;
+    min-height: auto;
+  }
+
+  .literatureInfo {
+    width: 100%;
+    padding: 20px;
+    border-right: none;
+  }
+
+  .literatureTitle {
+    font-size: 18px;
+  }
+
+  .literatureDescription {
+    font-size: 13px;
+  }
+
+  .literatureArticlesSection {
+    padding: 20px;
+  }
+
+  .literatureArticleTitle {
+    font-size: 15px;
+  }
+
+  .literatureArticleList {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .reviewItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .literatureArticleImage {
+    min-width: 100%;
+    min-height: 200px;
+    object-fit: cover;
+  }
+}
+
+@media (max-width: 480px) {
+  .literatureInfo {
+    padding: 15px;
+  }
+
+  .literatureArticlesSection {
+    padding: 15px;
+  }
+
+  .literatureTitle {
+    font-size: 16px;
+  }
+
+  .literatureArticleTitle {
+    font-size: 14px;
+  }
+
+  .literatureArticleImage {
+    min-height: 150px;
+  }
+}
+
 .reviewItem {
     display: flex;
     align-items: flex-start;

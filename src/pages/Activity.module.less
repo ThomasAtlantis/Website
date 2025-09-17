@@ -125,3 +125,52 @@
   background-color: white;
   text-align: center;
 }
+
+// 响应式设计
+@media (max-width: 768px) {
+  .masonryItem {
+    width: 100%; // 手机端单列
+    padding: 0px 5px 0px 5px;
+  }
+
+  h2 {
+    font-size: 16px;
+  }
+
+  p {
+    font-size: 13px;
+  }
+
+  .content {
+    font-size: 13px;
+    max-height: 400px;
+  }
+
+  .date {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .masonryItem {
+    width: 100%; // 小屏幕单列
+    padding: 0px 2px 0px 2px;
+  }
+
+  h2 {
+    font-size: 15px;
+  }
+
+  p {
+    font-size: 12px;
+  }
+
+  .content {
+    font-size: 12px;
+    max-height: 300px;
+  }
+
+  .date {
+    font-size: 11px;
+  }
+}

@@ -58,6 +58,15 @@
   .flex-between();
   width: 100%;
   padding-left: 0;
+  overflow-x: auto; // 允许水平滚动
+  -webkit-overflow-scrolling: touch; // iOS平滑滚动
+  scrollbar-width: none; // Firefox隐藏滚动条
+  -ms-overflow-style: none; // IE隐藏滚动条
+  
+  // 隐藏Webkit滚动条
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .menuItem {
@@ -73,6 +82,7 @@
   font-weight: @font-weight-bold;
   line-height: 64px;
   user-select: none;
+  flex-shrink: 0; // 防止项目收缩
   
   a {
     color: @dark-color;
@@ -159,4 +169,166 @@
 
 .footer {
   text-align: center;
+}
+
+// 手机端导航栏样式 - 与Home页面完全一致
+.mobileNavRow {
+  display: none; // 默认隐藏
+}
+
+// 手机端响应式样式 - 与Home页面保持一致
+@media (max-width: 768px) {
+  .header {
+    padding: 20px 15px 15px 15px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background-color: @white-color;
+    border-bottom: 1px solid #eee;
+  }
+
+  // 隐藏桌面端导航栏
+  .menu {
+    display: none;
+  }
+
+  // 显示手机端导航栏
+  .mobileNavRow {
+    display: flex;
+    width: 100%;
+    margin-bottom: 0;
+    box-sizing: border-box;
+    position: relative;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logoContainer {
+    margin-top: 0;
+    margin-left: 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    z-index: 20;
+    text-decoration: none;
+    color: inherit;
+    transition: opacity 0.3s ease;
+    
+    &:hover {
+      opacity: 0.8;
+      text-decoration: none;
+      color: inherit;
+    }
+  }
+
+  .logo {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+  }
+
+  .logoTitle {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1E1E1E;
+    margin: 0;
+    vertical-align: middle;
+    line-height: 30px;
+    font-family: "HarmonyOS Sans SC";
+    font-weight: 900;
+  }
+
+  .navSpacer {
+    flex: 1;
+  }
+
+  .navContainer {
+    flex: 0 0 auto;
+    position: static;
+    right: auto;
+    top: auto;
+    z-index: 10;
+  }
+
+  .navMenu {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 15px;
+  }
+
+  .navItem {
+    a {
+      color: #1E1E1E;
+      font-family: "HarmonyOS Sans SC";
+      font-size: 16px;
+      font-weight: 900;
+      text-decoration: none;
+      position: relative;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      
+      &::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: -5px;
+        width: 0;
+        height: 2px;
+        background-color: #1E1E1E;
+        transition: width 0.3s ease;
+      }
+      
+      &:hover::after {
+        width: 100%;
+      }
+      
+      &:hover {
+        color: #1E1E1E;
+      }
+    }
+    
+    &.active a {
+      &::after {
+        width: 100%;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 15px 10px 10px 10px;
+  }
+
+  .navMenu {
+    gap: 10px; // 与Home页面一致的间距
+  }
+
+  .navItem a {
+    font-size: 14px; // 与Home页面一致的字体大小
+  }
+
+  .content {
+    padding: 0 10px;
+    padding-top: 60px;
+  }
+}
+
+@media (max-width: 360px) {
+  .navMenu {
+    gap: 8px; // 更小屏幕的间距
+  }
+
+  .navItem a {
+    font-size: 13px; // 与Home页面一致的字体大小
+  }
+
+  .content {
+    padding: 0 8px;
+    padding-top: 60px;
+  }
 }

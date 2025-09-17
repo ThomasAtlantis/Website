@@ -3,7 +3,7 @@ import styles from "./Activity.module.less";
 import { ActivityData } from "@data/activity/activity";
 
 const Activity: React.FC = () => {
-  const num_columns = 4;
+  const [num_columns, setNumColumns] = useState(4);
   const vertical_gap = 20;
   const increment = 8;
   const hasCalculated = useRef(false);
@@ -58,6 +58,31 @@ const Activity: React.FC = () => {
       checkAllHeightsReady();
     }
   }, [visibleCount]);
+
+  // 响应式列数设置
+  useEffect(() => {
+    const updateColumns = () => {
+      if (window.innerWidth <= 768) {
+        setNumColumns(1);
+      } else {
+        setNumColumns(4);
+      }
+    };
+
+    updateColumns();
+    window.addEventListener('resize', updateColumns);
+    return () => window.removeEventListener('resize', updateColumns);
+  }, []);
+
+  // 当列数改变时重新计算布局
+  useEffect(() => {
+    if (hasCalculated.current) {
+      hasCalculated.current = false;
+      setItemVisable(false);
+      calculateAndSetHeights();
+      checkAllHeightsReady();
+    }
+  }, [num_columns]);
 
   const arrangeItems = () => {
     const masonryItems = document.querySelectorAll(`.${styles.masonryItem}`);

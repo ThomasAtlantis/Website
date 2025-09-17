@@ -3,6 +3,7 @@ import styles from "./index.module.less";
 import { Layout as AntdLayout } from "antd";
 import { useLocation, Link } from "react-router-dom";
 import { NAVBAR_ITEMS } from "@data/template/navbar";
+import logo from "/logo.png";
 const { Header, Content, Footer } = AntdLayout;
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -34,6 +35,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <AntdLayout className={styles.layout}>
       <Header className={styles.header}>
+        {/* 桌面端导航栏 */}
         <ul className={styles.menu}>
           {NAVBAR_ITEMS.map((item: any) => (
             <li
@@ -44,6 +46,27 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             </li>
           ))}
         </ul>
+
+        {/* 手机端导航栏 - 与Home页面结构一致 */}
+        <div className={styles.mobileNavRow}>
+          <Link to="/" className={styles.logoContainer}>
+            <img className={styles.logo} src={logo} alt="Logo" />
+            <h1 className={styles.logoTitle}>人间纪行</h1>
+          </Link>
+          <div className={styles.navSpacer}></div>
+          <div className={styles.navContainer}>
+            <ul className={styles.navMenu}>
+              {NAVBAR_ITEMS.filter((item: any) => item.key !== 'index').map((item: any) => (
+                <li
+                  key={item.key}
+                  className={`${styles.navItem} ${item.key === currentKey ? styles.active : ''}`}
+                >
+                  <Link to={item.href}>{item.label}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
       </Header>
       <Content className={styles.content}>
         {!isDetailPage && <h1 className={styles.title}>{activeTitle}</h1>}
