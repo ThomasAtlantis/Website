@@ -10,6 +10,7 @@ Typescript + React + Vite + GitHub Actions + GitHub Pages
 - [ ] Dev: art page
 - [ ] Dev: literature page
   - [x] Dev: detail page 1
+  - [x] Dev: review list
 - [ ] Dev: project page
 - [x] Dev: about page
 - [ ] UX: image placeholder for homepage during loading
@@ -21,4 +22,4 @@ Typescript + React + Vite + GitHub Actions + GitHub Pages
   - [x] Dev: zhihu article list crawler
   - [ ] Dev: zhihu2markdown
   - [ ] Dev: douban2markdown
-- [ ] UX: 404 page and redirect to SPA
+- [x] UX: 404 page and redirect to SPA
