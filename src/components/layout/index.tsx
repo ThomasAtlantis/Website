@@ -73,7 +73,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         {children}
       </Content>
       <Footer className={styles.footer}>
-        Copyright ©2017-{new Date().getFullYear()} All rights reserved — website designed by Shangyu Liu
+        Copyright ©2017-{new Date().getFullYear()} All rights reserved — 人间纪行
       </Footer>
     </AntdLayout>
   );

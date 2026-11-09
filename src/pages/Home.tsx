@@ -13,20 +13,10 @@ import githubIcon from "@images/homepage/github.svg";
 import emailIcon from "@images/homepage/email.svg";
 import copyIcon from "@images/homepage/copy.svg";
 import wechatBlogIcon from "@images/homepage/wechat_blog.png";
-import doubanIcon from "@images/homepage/douban.png";
 import wechatQR from "@images/homepage/wechat_blog_qrcode.png";
-
-const activities = import.meta.glob("@images/homepage/bottom/*.jpg", { eager: true });
 
 const zhihu_url = "https://www.zhihu.com/people/qing_chuan";
 const github_url = "https://github.com/ThomasAtlantis";
-const douban_url = "https://www.douban.com/people/liushangyu";
-
-const activityImages = Object.values(activities).map((module: any) => ({
-  src: module.default,
-  aspectRatio: 2,
-  span: 1
-}));
 
 // 自定义Tooltip组件
 interface TooltipProps {
@@ -75,7 +65,7 @@ const Home: React.FC = () => {
   const [isEmailHovered, setIsEmailHovered] = useState(false);
   const [showCopySuccess, setShowCopySuccess] = useState(false);
 
-  const emailAddress = "liushangyu@sjtu.edu.cn";
+  const emailAddress = "hi@qingchuan.online";
 
   const handleWechatClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -135,7 +125,7 @@ const Home: React.FC = () => {
       <div className={styles.contentRow}>
         <div className={`${styles.column1}`}>
           <p className={styles.leftColumnText}>
-            Copyright©2017-{new Date().getFullYear()} All rights reserved — designed by Shangyu Liu
+            Copyright©2017-{new Date().getFullYear()} All rights reserved — 人间纪行
           </p>
         </div>
         <div className={`${styles.column2}`}>
@@ -158,11 +148,6 @@ const Home: React.FC = () => {
                 <Tooltip text="知乎" delay={200}>
                   <a href={zhihu_url} target="_blank" className={styles.socialIcon}>
                     <img src={zhihu} alt="知乎" />
-                  </a>
-                </Tooltip>
-                <Tooltip text="豆瓣" delay={200}>
-                  <a href={douban_url} target="_blank" className={styles.socialIcon}>
-                    <img src={doubanIcon} alt="豆瓣" />
                   </a>
                 </Tooltip>
                 <Tooltip text={isEmailHovered ? "复制邮箱" : "Email"} delay={200}>
@@ -232,28 +217,6 @@ const Home: React.FC = () => {
             <p>而一将功成万骨枯。</p>
           </div>
         </div>
-      </div>
-
-      <div className={styles.imageGrid}>
-        <div
-          className={`${styles.gridItem}`}
-          style={{ aspectRatio: 2, border: '1px solid #ddd' }}
-        >
-          <img style={{ width: '100%', height: '100%' }} src='https://mapmyvisitors.com/map.png?cl=080808&w=300&t=n&d=lGFuoYIEaSY_Ud1iQKz23UTAHC1edlNQeXo3Ybx1M2s&co=9abad9&ct=808080' />
-        </div>
-        {activityImages.map((image, index) => (
-          index != 0 && <div
-            key={index}
-            className={`${styles.gridItem} ${styles[`span${image.span}`]}`}
-            style={{ aspectRatio: image.aspectRatio }}
-          >
-            <img
-              src={image.src}
-              alt={`活动图片 ${index + 1}`}
-              className={styles.gridImage}
-            />
-          </div>
-        ))}
       </div>
 
       {/* 微信二维码弹窗 */}

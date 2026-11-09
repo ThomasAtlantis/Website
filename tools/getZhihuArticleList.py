@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 import itertools
 import json
@@ -28,7 +29,7 @@ def get_column_dict(config):
         'Accept': 'application/json, text/plain, */*',
     }
     cookies = {
-        "z_c0": "2|1:0|10:1756820329|4:z_c0|80:MS4xUDhuRUF3QUFBQUFtQUFBQVlBSlZUV2VJbG1sSF9ZY1JQdTNGSjNOaWJwcFd1WlVBQ3FEaXN3PT0=|da2bd714560338fd3f6bdf9789931b95bf9efc02f3bc979c74cdd53e3c2e6452",
+        "z_c0": os.environ["ZHIHU_Z_C0"],
     }
     data = []
     while True:
@@ -70,7 +71,7 @@ def get_column_article_dict(column_item):
             'Accept': 'application/json, text/plain, */*',
         }
         cookies = {
-            "z_c0": "2|1:0|10:1756820329|4:z_c0|80:MS4xUDhuRUF3QUFBQUFtQUFBQVlBSlZUV2VJbG1sSF9ZY1JQdTNGSjNOaWJwcFd1WlVBQ3FEaXN3PT0=|da2bd714560338fd3f6bdf9789931b95bf9efc02f3bc979c74cdd53e3c2e6452",
+            "z_c0": os.environ["ZHIHU_Z_C0"],
         }
         data = []
         while True:
@@ -179,7 +180,7 @@ def retrieve_other_articles(current_articles, config):
         'Accept': 'application/json, text/plain, */*',
     }
     cookies = {
-        "z_c0": "2|1:0|10:1756820329|4:z_c0|80:MS4xUDhuRUF3QUFBQUFtQUFBQVlBSlZUV2VJbG1sSF9ZY1JQdTNGSjNOaWJwcFd1WlVBQ3FEaXN3PT0=|da2bd714560338fd3f6bdf9789931b95bf9efc02f3bc979c74cdd53e3c2e6452",
+        "z_c0": os.environ["ZHIHU_Z_C0"],
     }
     data = []
     while True:
@@ -288,7 +289,7 @@ def retrieve_other_answers(current_articles, config):
         'Accept': 'application/json, text/plain, */*',
     }
     cookies = {
-        "z_c0": "2|1:0|10:1756820329|4:z_c0|80:MS4xUDhuRUF3QUFBQUFtQUFBQVlBSlZUV2VJbG1sSF9ZY1JQdTNGSjNOaWJwcFd1WlVBQ3FEaXN3PT0=|da2bd714560338fd3f6bdf9789931b95bf9efc02f3bc979c74cdd53e3c2e6452",
+        "z_c0": os.environ["ZHIHU_Z_C0"],
     }
     data = []
     while True:
@@ -353,7 +354,7 @@ def retrieve_moments(config):
         'Accept': 'application/json, text/plain, */*',
     }
     cookies = {
-        "z_c0": "2|1:0|10:1756820329|4:z_c0|80:MS4xUDhuRUF3QUFBQUFtQUFBQVlBSlZUV2VJbG1sSF9ZY1JQdTNGSjNOaWJwcFd1WlVBQ3FEaXN3PT0=|da2bd714560338fd3f6bdf9789931b95bf9efc02f3bc979c74cdd53e3c2e6452",
+        "z_c0": os.environ["ZHIHU_Z_C0"],
     }
     data = []
     while True:

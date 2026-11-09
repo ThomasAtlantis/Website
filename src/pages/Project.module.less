@@ -1,0 +1,139 @@
+.projectContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.categoryRow {
+  display: flex;
+  margin-bottom: 2px;
+  position: relative;
+  border-top: 1px solid #eee;
+  padding-top: 20px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.categoryInfo {
+  text-align: justify;
+  width: 250px;
+  padding-left: 0;
+  padding-right: 32px;
+  padding-bottom: 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.categoryTitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 12px 0;
+  line-height: 1.3;
+}
+
+.categoryDescription {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.itemsSection {
+  flex: 1;
+  padding-bottom: 32px;
+  display: flex;
+  align-items: flex-start;
+}
+
+.itemList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 20px;
+}
+
+.itemRow {
+  padding-top: 0;
+  text-align: justify;
+  padding-bottom: 12px;
+  transition: all 0.3s ease;
+  position: relative;
+  line-break: anywhere;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    padding-left: 12px;
+    border-radius: 4px;
+    margin: 0 -12px;
+    padding-right: 12px;
+  }
+}
+
+.itemTitle {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.5;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .categoryRow {
+    flex-direction: column;
+    min-height: auto;
+  }
+
+  .categoryInfo {
+    width: 100%;
+    padding: 20px;
+    border-right: none;
+  }
+
+  .categoryTitle {
+    font-size: 18px;
+  }
+
+  .categoryDescription {
+    font-size: 13px;
+  }
+
+  .itemsSection {
+    padding: 20px;
+  }
+
+  .itemTitle {
+    font-size: 15px;
+  }
+
+  .itemList {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .categoryInfo {
+    padding: 15px;
+  }
+
+  .itemsSection {
+    padding: 15px;
+  }
+
+  .categoryTitle {
+    font-size: 16px;
+  }
+
+  .itemTitle {
+    font-size: 14px;
+  }
+}
